@@ -1,0 +1,17 @@
+tool	approach	tool_lt
+CIRCexplorer3	segmented read-based	A
+CirComPara2	integrative	B
+circRNA_finder	segmented read-based	C
+circseq_cup	segmented read-based	D
+CircSplice	segmented read-based	E
+circtools	segmented read-based	F
+CIRI2	segmented read-based	G
+CIRIquant	segmented read-based	H
+ecircscreen	integrative	I
+find_circ	segmented read-based	J
+KNIFE	candidate-based	K
+NCLcomparator	candidate-based	L
+NCLscan	candidate-based	N
+PFv2	segmented read-based	M
+Sailfish-cir	segmented read-based	N
+segemehl	segmented read-based	O
