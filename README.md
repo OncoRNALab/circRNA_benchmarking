@@ -2,7 +2,7 @@
 
 This repository contains all data and scripts used to generate the numbers and figures for the circRNA detection tool benchmarking paper (in preparation).
 
-It may take a while to clone this repository (up to one hour), as Supplementary Table 2 is a large file stored using Git LSF.
+!!! It may take a while to clone this repository (up to one hour), as Supplementary Table 2 is a large file stored using Git LSF.
 
 The `data` folder contains
 - the `Supplementary_Table_2_all_circRNAs.txt` file, which contains all predicted circRNAs (1.1 million) in this study with their annotation.
