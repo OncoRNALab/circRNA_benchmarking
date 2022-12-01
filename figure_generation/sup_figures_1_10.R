@@ -296,6 +296,7 @@ count_conc_lm %>% pull(R_squared) %>% quantile()
 
 #' # Sup Figure 9: Jaccard distance between tools (heatmap)
 #' Heatmap based on counts
+#' here only for count ≥ 5 (in sup figure for all circ)
 #' calculate Jaccard index 
 
 jac = read_tsv("../data/Supplementary_Table_5_combo_2tools.txt") %>%
