@@ -341,3 +341,83 @@ chisq.test(cont_table)
 #' OR
 OR = (793/97)/(113/39)
 OR
+
+#' # Using sensitivity
+#' 
+
+tool_anno = read_tsv('../data/details/tool_annotation.txt')
+val = read_tsv('../data/Supplementary_Table_4_precision_values.txt')
+
+#' add annotation to sensitivity
+sens_anno = val %>% 
+  group_by(tool) %>%
+  slice(1) %>%
+  select(tool, sensitivity) %>%
+  left_join(tool_anno) %>%
+  select(-tool_lt) %>% ungroup()
+
+sens_anno
+
+#' ## Detection approach: segmented read-based VS candidate-based
+wilcox.test(sensitivity ~ approach, data=sens_anno %>% filter(!approach == 'integrative')) 
+
+kruskal.test(sensitivity ~ approach, data=sens_anno)
+
+#' ## Detection based on annotation: known splice sites VS entire genome
+wilcox.test(sensitivity ~ lin_annotation, data=sens_anno %>% filter(!is.na(lin_annotation))) 
+
+#' ## Strand annotation method
+kruskal.test(sensitivity ~ strand_anno, data=sens_anno %>% 
+               filter(!is.na(strand_anno), !strand_anno == "no strand reported"))
+
+
+#' ## Splicing: canonical VS non-canonical
+wilcox_ss = wilcox.test(sensitivity ~ splicing, data=sens_anno) 
+
+wilcox_ss
+
+sens_anno %>%
+  group_by(splicing) %>%
+  summarise(mean_sens = mean(sensitivity))
+
+#' ### method 1
+N = nrow(sens_anno)
+N
+Z = qnorm(wilcox_ss$p.value/2)
+Z
+r = abs(Z)/sqrt(N)
+r
+
+#' ### method 2
+library(rstatix)
+library(ggpubr)
+sens_anno %>% rstatix::wilcox_test(sensitivity ~ splicing)
+
+sens_anno %>% rstatix::wilcox_effsize(sensitivity ~ splicing)
+
+#sens_anno %>% rstatix::wilcox_effsize(sensitivity ~ splicing, ci = T)
+
+
+
+#' ## median difference in sensitivity
+
+median_diff = tibble()
+
+for (tool_can in sens_anno %>% filter(splicing == "canonical") %>% pull(tool)) {
+  sens_can = sens_anno %>% filter(tool == tool_can) %>% pull(sensitivity)
+  
+  for (tool_non_can in sens_anno %>% filter(splicing == "non-canonical") %>% pull(tool)) {
+    sens_non_can = sens_anno %>% filter(tool == tool_non_can) %>% pull(sensitivity)
+    
+    median_diff = median_diff %>%
+      bind_rows(tibble(tool_can, sens_can, tool_non_can, sens_non_can))
+    
+  }
+}
+
+median_diff = median_diff %>%
+  mutate(sens_diff = sens_can - sens_non_can)
+
+median_diff
+
+median_diff %>% pull(sens_diff) %>% median()
