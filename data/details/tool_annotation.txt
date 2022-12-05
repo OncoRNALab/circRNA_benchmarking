@@ -8,7 +8,7 @@ circtools	segmented read-based	F	entire genome	based on mapping to genome	canoni
 CIRI2	segmented read-based	G	entire genome	based on GT-AG splice sites	canonical	no
 CIRIquant	segmented read-based	H	entire genome	based on GT-AG splice sites	canonical	no
 ecircscreen	integrative	I	entire genome	based on consensus from tools	canonical	no
-find_circ	segmented read-based	J			canonical	no
+find_circ	segmented read-based	J	entire genome	based on mapping to genome	canonical	no
 KNIFE	candidate-based	K	entire genome	based on linear annotation	non-canonical	yes
 NCLcomparator	candidate-based	L	known splice sites	based on linear annotation	non-canonical	no
 NCLscan	candidate-based	N	known splice sites	based on linear annotation	non-canonical	no

@@ -364,11 +364,11 @@ wilcox.test(sensitivity ~ approach, data=sens_anno %>% filter(!approach == 'inte
 kruskal.test(sensitivity ~ approach, data=sens_anno)
 
 #' ## Detection based on annotation: known splice sites VS entire genome
-wilcox.test(sensitivity ~ lin_annotation, data=sens_anno %>% filter(!is.na(lin_annotation))) 
+wilcox.test(sensitivity ~ lin_annotation, data=sens_anno)
 
 #' ## Strand annotation method
 kruskal.test(sensitivity ~ strand_anno, data=sens_anno %>% 
-               filter(!is.na(strand_anno), !strand_anno == "no strand reported"))
+               filter(!strand_anno == "no strand reported"))
 
 
 #' ## Splicing: canonical VS non-canonical
