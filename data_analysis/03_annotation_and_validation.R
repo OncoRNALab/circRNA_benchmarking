@@ -399,7 +399,7 @@ sens_anno %>% rstatix::wilcox_effsize(sensitivity ~ splicing)
 
 
 
-#' ## median difference in sensitivity
+#' ### Median difference in sensitivity
 
 median_diff = tibble()
 
@@ -421,3 +421,7 @@ median_diff = median_diff %>%
 median_diff
 
 median_diff %>% pull(sens_diff) %>% median()
+
+
+#' ## Filtering
+wilcox.test(sensitivity ~ BSJ_filter, data=sens_anno) 
