@@ -30,8 +30,11 @@ conflict_prefer('intersect', 'dplyr')
 
 #' ## Read data
 cq = read_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
+all_circ = read_tsv("../data/Supplementary_Table_2_all_circRNAs.txt")
 
 cq
+all_circ
+
 
 #' # Presence in db (n = 890)
 #' make count table
@@ -425,3 +428,33 @@ median_diff %>% pull(sens_diff) %>% median()
 
 #' ## Filtering
 wilcox.test(sensitivity ~ BSJ_filter, data=sens_anno) 
+
+
+#' ## Correlation estimated sensitivity and theoretical nr of TPs
+
+val_cor = val %>%
+  left_join(all_circ %>%
+              group_by(cell_line, tool) %>%
+              summarise(n = n()) %>%
+              pivot_wider(names_from = cell_line,
+                          values_from = n)) %>%
+  select(tool, count_group, perc_compound_val, HLF, `NCI-H23`, SW480, sensitivity) %>%
+  mutate(HLF = perc_compound_val * HLF,
+         `NCI-H23` = perc_compound_val * `NCI-H23`,
+         SW480 = perc_compound_val * SW480) %>%
+  pivot_longer(cols = c(HLF, `NCI-H23`, SW480),
+               values_to = "theo_TP_all",
+               names_to = "cell_line") %>%
+  group_by(tool, count_group, perc_compound_val, sensitivity) %>%
+  summarize(theo_TP_all_cl = sum(theo_TP_all)) %>% ungroup()
+
+val_cor
+
+
+#' below 5
+val_cor_tmp = val_cor %>% filter(count_group == "count < 5")
+cor.test(val_cor_tmp$sensitivity, val_cor_tmp$theo_TP_all_cl, method = 'spearman')
+
+#' above 5
+val_cor_tmp = val_cor %>% filter(count_group == "count ≥ 5")
+cor.test(val_cor_tmp$sensitivity, val_cor_tmp$theo_TP_all_cl, method = 'spearman')
