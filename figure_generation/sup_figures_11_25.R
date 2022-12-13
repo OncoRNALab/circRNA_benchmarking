@@ -468,14 +468,20 @@ val %>%
 #' # Sup Figure 22: sensitivity per tool
 
 val %>%
-  # sensitivity is calculated withtouth taking count groups into account
+  # sensitivity is calculated without taking count groups into account
   # so we can just select one of them
   group_by(tool) %>%
   slice(1) %>%
+  select(tool, sensitivity) %>%
+  mutate(margin = qnorm(0.975)*sqrt(sensitivity*(1-sensitivity)/957), #957 is total nr of val circ
+         CI_low = sensitivity - margin,
+         CI_up = sensitivity + margin) %>%
   ggplot(aes(tool, sensitivity)) +
   geom_bar(stat = 'identity', fill = '#CC79A7') +
   scale_y_continuous(labels = scales::percent_format()) +
   mytheme_discrete_x +
+  geom_errorbar(aes(ymin=CI_low, ymax=CI_up), 
+                width=.3, color = 'grey45') +
   xlab('')
 
 #ggsave('sup_figure_22.pdf', width = 15, height = 8.5, units = "cm")
