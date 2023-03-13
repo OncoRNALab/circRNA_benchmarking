@@ -71,22 +71,8 @@ ggplot(prop_circ, aes(year, query_hits / all_hits)) +
   scale_y_continuous(labels = scales::percent_format())
 
 
-# ggsave('separate_figures/figure_1A.pdf',  width = 10, height = 8.5, units = "cm")
+ggsave('separate_figures/figure_1A.pdf',  width = 10, height = 8.5, units = "cm")
 
 #' calculate CAGR
-#' CAGR = 100[(Ending Value + Beginning Value)1/n  1 ]
-prop_circ %>% filter(query_hits > 0) %>%
-  mutate(previous_year = year - 1) %>%
-  left_join(prop_circ %>% rename(previous_year = year, query_hits_py = query_hits) %>%
-              select(previous_year, query_hits_py)) %>%
-  mutate(AGR = (query_hits - query_hits_py) / query_hits_py,
-         nr_y = year - 2011,
-         CAGR = 100 * ((query_hits + query_hits_py)^(1/ nr_y) -1)) %>%
-  filter(!year == 2022) %>%
-  top_n(5, nr_y) %>%
-  pull(CAGR) %>% median()
 
-
-100 * ((4222 + 215) ^ (1/5) - 1)
-
-((4177-215)^(1/5))
+(4684/478)^(1/5)-1
