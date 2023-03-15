@@ -127,26 +127,18 @@ upset(fromList(upset),
 #' # Figure 3C & Sup Figure 21
 #' add total nr of circRNAs and calculate theoretical nr of TP
 val_cl = val %>%
+  # use perc_compound_val
+  select(tool, count_group, perc_compound_val) %>%
+  # get the number of detected circRNAs for each cell line and tool, per count group
   left_join(all_circ %>%
-              group_by(cell_line, tool) %>%
-              summarise(n = n()) %>%
-              pivot_wider(names_from = cell_line,
-                          values_from = n)) %>%
-  select(tool, count_group, perc_compound_val, HLF, `NCI-H23`, SW480) %>%
-  mutate(HLF = perc_compound_val * HLF,
-         `NCI-H23` = perc_compound_val * `NCI-H23`,
-         SW480 = perc_compound_val * SW480) %>%
-  pivot_longer(cols = c(HLF, `NCI-H23`, SW480),
-               values_to = "theo_TP_all",
-               names_to = "cell_line") %>%
-  left_join(all_circ %>%
-              group_by(cell_line, tool) %>%
-              summarise(total_n_ut = n()))
+              group_by(cell_line, tool, count_group) %>%
+              summarise(total_n_ut = n())) %>%
+  # calculate the theoretical nr of validated circ
+  mutate(theo_TP_all = perc_compound_val * total_n_ut)
 
 val_cl
 
 val_cl$tool = factor(val_cl$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl")) 
-
 
 val_cl %>%
   #filter(cell_line == 'HLF') %>%
@@ -155,6 +147,7 @@ val_cl %>%
   geom_bar(aes(tool, theo_TP_all, fill = count_group), stat = "identity") +
   facet_wrap(~cell_line+count_group, scales = 'free') +
   #facet_wrap(~count_group, scales = 'free') +
+  #facet_grid(rows = vars(cell_line), cols = vars(count_group), scales = 'free', space = 'free') +
   mytheme_discrete_x +
   scale_fill_manual(values = c('#00B9F2', '#E69F00' , '#999999')) +
   xlab('') +
@@ -163,5 +156,5 @@ val_cl %>%
   scale_y_continuous(labels = scales::comma_format()) +
   theme(legend.position="none")
 
-#ggsave('sup_figure_21.pdf',  width = 21, height = 24.5, units = "cm")
-# ggsave('separate_figures/figure_3C_alt2.pdf',  width = 21, height = 8, units = "cm")
+#ggsave('separate_figures/sup_figure_21.pdf',  width = 21, height = 24.5, units = "cm")
+#ggsave('separate_figures/figure_3C_alt2.pdf',  width = 21, height = 8, units = "cm")

@@ -60,13 +60,15 @@ mytheme_discrete_x = mytheme +
 cq = read_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
 all_circ = read_tsv('../data/Supplementary_Table_2_all_circRNAs.txt')
 val = read_tsv('../data/Supplementary_Table_4_precision_values.txt')
+sens = read_tsv('../data/Supplementary_Table_5_sensitivity_values.txt')
 
 all_circ$tool = factor(all_circ$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl"))
 
 cq$tool = factor(cq$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl"))
 
-
 val$tool = factor(val$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl"))
+
+sens$tool = factor(sens$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl"))
 
 
 cq
@@ -458,7 +460,7 @@ val %>%
   ylab('compound precision metric') +
   theme(legend.position = "")
 
-#ggsave('sup_figures/sup_figure_20.pdf', width = 21, height = 10, units = "cm")
+#ggsave('separate_figures/sup_figure_20.pdf', width = 21, height = 10, units = "cm")
 
 
 #' # Sup Figure 21: theoratical nr of TP circRNAs
@@ -467,24 +469,22 @@ val %>%
 
 #' # Sup Figure 22: sensitivity per tool
 
-val %>%
-  # sensitivity is calculated without taking count groups into account
-  # so we can just select one of them
-  group_by(tool) %>%
-  slice(1) %>%
-  select(tool, sensitivity) %>%
+sens %>%
   mutate(margin = qnorm(0.975)*sqrt(sensitivity*(1-sensitivity)/957), #957 is total nr of val circ
          CI_low = sensitivity - margin,
          CI_up = sensitivity + margin) %>%
-  ggplot(aes(tool, sensitivity)) +
-  geom_bar(stat = 'identity', fill = '#CC79A7') +
+  ggplot(aes(tool, sensitivity, fill = count_group_median)) +
+  geom_bar(stat = 'identity') +
   scale_y_continuous(labels = scales::percent_format()) +
   mytheme_discrete_x +
   geom_errorbar(aes(ymin=CI_low, ymax=CI_up), 
                 width=.3, color = 'grey45') +
-  xlab('')
+  facet_wrap(~count_group_median) +
+  scale_fill_manual(values = c('#00B9F2', '#E69F00')) +
+  xlab('') +
+  theme(legend.position = '')
 
-#ggsave('sup_figure_22.pdf', width = 15, height = 8.5, units = "cm")
+#ggsave('separate_figures/sup_figure_22.pdf', width =20, height = 10, units = "cm")
 
 #' # Sup Figure 23: validation of circRNA compared to their precense in databases
 val_db = cq %>% 
@@ -518,8 +518,8 @@ val_db %>%
 
 #' all possible combo's, only circRNAs ≥ 5
 
-simple_union = read_tsv('../data/Supplementary_Table_5_combo_2tools.txt')
-simple_union_3 = read_tsv('../data/Supplementary_Table_6_combo_3tools.txt')
+simple_union = read_tsv('../data/Supplementary_Table_6_combo_2tools.txt')
+simple_union_3 = read_tsv('../data/Supplementary_Table_7_combo_3tools.txt')
 
 
 #' ### simple version
@@ -566,7 +566,7 @@ union_sub_3
 #' give combo nr and add info
 
 union_sub_3 = union_sub_3 %>%
-  mutate(combo = paste("combo", 1:9, sep = "_"))
+  mutate(combo = paste("combo", 1:12, sep = "_"))
 
 union_sub_3 = union_sub_3 %>%
   bind_rows(simple_union_3 %>%
@@ -633,10 +633,10 @@ union_sub_3 %>%
   scale_color_manual(values = c('#CC79A7', '#E69F00', '#0072B2')) + 
   scale_x_continuous(labels = scales::percent_format()) +
   scale_y_continuous(labels = scales::percent_format()) +
-  xlab('validation rate') +
+  xlab('(weighted) compound precision value') +
   ylab('percentage of all predicted circRNAs')
 
-#ggsave('sup_figure_25.pdf', width = 21, height = 18, units = "cm")
+#ggsave('separate_figures/sup_figure_25.pdf', width = 21, height = 18, units = "cm")
 
 
 #' check mean increase in perc

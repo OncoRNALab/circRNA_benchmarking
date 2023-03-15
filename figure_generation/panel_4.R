@@ -93,7 +93,7 @@ val_df %>%
 
 
 #' # Figure 4B & Sup Figure 24
-simple_union = read_tsv('../data/Supplementary_Table_5_combo_2tools.txt')
+simple_union = read_tsv('../data/Supplementary_Table_6_combo_2tools.txt')
 simple_union
 
 #' add total nr of circ for that cell line
@@ -130,7 +130,7 @@ union_sub = union_sub %>%
 
 union_sub
 
-#' try as percentage of all circ in that cell line
+#' as percentage of all circ in that cell line
 
 union_sub %>% 
   left_join(all_circ %>% select(circ_id, cell_line, count_group) %>%
@@ -147,11 +147,11 @@ union_sub %>%
   scale_color_manual(values = c('#E69F00', '#0072B2')) +
   scale_x_continuous(labels = scales::percent_format()) +
   scale_y_continuous(labels = scales::percent_format()) +
-  xlab('validation rate') +
-  ylab('number of circRNAs')
+  xlab('(weighted) compound precision value') +
+  ylab('% of all predicted circRNAs')
 
-#ggsave('figure_4B.pdf',  width = 12, height = 10, units = "cm")
-#ggsave('sup_figure_24.pdf',  width = 20, height = 20, units = "cm")
+#ggsave('separate_figures/figure_4B.pdf',  width = 12, height = 10, units = "cm")
+#ggsave('separate_figures/sup_figure_24.pdf',  width = 20, height = 20, units = "cm")
 
   
 #' check mean increase in perc

@@ -102,18 +102,31 @@ cq %>% count(amp_seq_val)
 cq %>% count(amp_seq_val_detail)
 
 
+#' ## Add a compound validation 'decision' for each circ
+cq = cq %>%
+  mutate(RR_val_tmp = ifelse(RR_val_detail == 'out_of_range', 'fail', RR_val)) %>% # when circ cannot be measured for RR => count as fail
+  mutate(compound_val = ifelse(qPCR_val == "pass" & RR_val_tmp == "pass" & amp_seq_val == "pass", "pass", "NA"),
+         compound_val = ifelse(qPCR_val == 'fail' | RR_val_tmp == "fail" | amp_seq_val == 'fail', 'fail', compound_val),
+         compound_val = ifelse(is.na(amp_seq_val), NA, compound_val)) %>% 
+  select(-RR_val_tmp)
+
+#' statistics
+cq %>% count(compound_val)
+
 #' ## Add circRNA annotation and save as Supplementary Table 3
 all_circ = read_tsv("../data/Supplementary_Table_2_all_circRNAs.txt")
 
 all_circ
 
+cq = cq %>%
+  left_join(all_circ) 
+
 cq %>%
-  left_join(all_circ) %>%
   write_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
 
 #' # Calculate val rates (precision) per method per tool
 perc_val = cq %>% 
-  select(tool, circ_id, cell_line, count_group, qPCR_val, RR_val, RR_val_detail, amp_seq_val, amp_seq_val_detail) %>%
+  select(tool, circ_id, cell_line, count_group, qPCR_val, RR_val, RR_val_detail, amp_seq_val, amp_seq_val_detail, compound_val) %>%
   group_by(tool, count_group) %>%
   summarise(nr_qPCR_total = n(),
             nr_qPCR_fail = sum(qPCR_val == 'fail'),
@@ -123,41 +136,21 @@ perc_val = cq %>%
             nr_RR_val = sum(RR_val == "pass", na.rm = T),
             nr_amp_total = n() - sum(is.na(amp_seq_val)),  # here NA are the ones 'not_included'
             nr_amp_fail = sum(amp_seq_val == "fail", na.rm = T),
-            nr_amp_val = sum(amp_seq_val == "pass", na.rm = T)) %>%
-  mutate(perc_qPCR_val = nr_qPCR_val/nr_qPCR_total,
-         perc_RR_val = nr_RR_val/nr_RR_total,
-         perc_amp_val = nr_amp_val/nr_amp_total) %>%
-  ungroup()
-
-perc_val
-
-#' # Calculate compound val rate per tool
-#' ignore NAs and multiply
-perc_val_compound = cq %>% 
-  select(tool, circ_id, cell_line, count_group, qPCR_val, RR_val, RR_val_detail, amp_seq_val, amp_seq_val_detail) %>%
-  group_by(tool, count_group) %>%
-  summarise(nr_qPCR_total = n(),
-            nr_qPCR_fail = sum(qPCR_val == 'fail'),
-            nr_qPCR_val = sum(qPCR_val == 'pass'),
-            nr_RR_total = n() - sum(is.na(RR_val)) - sum(RR_val_detail == "fail_qPCR"), # NA = 'out_of_range' + 'qPCR_fail'
-            nr_RR_fail = sum(RR_val == "fail", na.rm = T),
-            nr_RR_val = sum(RR_val == "pass", na.rm = T),
-            nr_amp_total = n() - sum(is.na(amp_seq_val) | RR_val_detail == "fail_qPCR"), # NA = 'not_included' + 'qPCR_fail'
-            nr_amp_fail = sum(amp_seq_val == "fail", na.rm = T),
-            nr_amp_val = sum(amp_seq_val == "pass", na.rm = T)) %>%
+            nr_amp_val = sum(amp_seq_val == "pass", na.rm = T),
+            nr_compound_total = n() - sum(is.na(amp_seq_val)), # here NA are the ones 'not_included
+            nr_compound_fail = sum(compound_val == "fail", na.rm = T),
+            nr_compound_val = sum(compound_val == "pass", na.rm = T)) %>%
   mutate(perc_qPCR_val = nr_qPCR_val/nr_qPCR_total,
          perc_RR_val = nr_RR_val/nr_RR_total,
          perc_amp_val = nr_amp_val/nr_amp_total,
-         perc_compound_val = perc_qPCR_val*perc_RR_val*perc_amp_val) %>%
+         perc_compound_val = nr_compound_val/nr_compound_total) %>%
   ungroup()
 
-perc_val_compound %>% select(tool, count_group, perc_compound_val) %>% view()
- 
-#' add to other dataframe with separate validation rates
-perc_val = perc_val %>%
-  left_join(perc_val_compound %>% select(tool, count_group, perc_compound_val))
-
 perc_val
+
+perc_val %>% write_tsv('../data/Supplementary_Table_4_precision_values.txt')
+
+
 
 #' ## Per tool val rates => stats
 perc_val %>%
@@ -175,29 +168,48 @@ perc_val %>%
   pull(perc_amp_val) %>%
   quantile()
 
+perc_val %>%
+  filter(count_group == 'count ≥ 5') %>%
+  pull(perc_compound_val) %>%
+  quantile()
+
+
 #' # Calculate sensitivity
+
+#' first calculate the total nr of validated circ per count group
+
+nr_val = cq %>% 
+  # get set of uniquely validated circRNAs
+  filter(qPCR_val == 'pass',
+         RR_val == 'pass',
+         amp_seq_val == 'pass') %>%
+  select(circ_id, cell_line, count_group_median) %>% unique() %>%
+  count(count_group_median) %>%
+  rename(nr_expected = n)
+
+nr_val
+
+#' then calculate sensitivity by dividing nr of circ found by total
 sens = cq %>% 
   # get set of uniquely validated circRNAs
   filter(qPCR_val == 'pass',
          RR_val == 'pass',
          amp_seq_val == 'pass') %>%
-  select(circ_id, cell_line) %>% unique() %>%
+  select(circ_id, cell_line, count_group_median) %>% unique() %>%
   # check witch tools have detected these
   left_join(all_circ %>%
               select(tool, circ_id, cell_line) %>% unique()) %>%
-  group_by(tool) %>% 
-  summarise(nr_detected = n(),
-            sensitivity = nr_detected/957)
+  group_by(tool, count_group_median) %>% 
+  summarise(nr_detected = n()) %>%
+  left_join(nr_val) %>%
+  mutate(sensitivity = nr_detected/nr_expected) %>%
+  ungroup()
 
 sens
 
-#' add sensitivity to dataframe
-perc_val = perc_val %>%
-  left_join(sens %>% select(tool, sensitivity))
-
 
 #' # Save dataframe (Sup Table 4)
-perc_val %>% write_tsv('../data/Supplementary_Table_4_precision_values.txt')
+sens %>% write_tsv('../data/Supplementary_Table_5_sensitivity_values.txt')
 
 
 

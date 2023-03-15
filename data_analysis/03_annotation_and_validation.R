@@ -31,18 +31,19 @@ conflict_prefer('intersect', 'dplyr')
 #' ## Read data
 cq = read_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
 all_circ = read_tsv("../data/Supplementary_Table_2_all_circRNAs.txt")
+val = read_tsv('../data/Supplementary_Table_4_precision_values.txt')
 
 cq
 all_circ
 
 
-#' # Presence in db (n = 890)
+#' # Presence in db
 #' make count table
 cont_table = cq %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group, n_db) %>%
+  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group_median, n_db) %>%
   unique() %>%
   # only keep high abundant circRNAs
-  filter(count_group == 'count ≥ 5') %>%
+  filter(count_group_median == 'count ≥ 5') %>%
   # to use all val together
   filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
   mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 'pass', 'fail')) %>%
@@ -72,15 +73,16 @@ chisq.test(cont_table)$expected
 chisq.test(cont_table)
 
 #' OR
-OR = (705/36)/(88/61)
+OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
 OR
 
-#' # Link with detected by multiple tools (n = 890)
+
+#' # Link with detected by multiple tools
 #' make count table
 cont_table = cq %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group, n_detected) %>%
+  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group_median, n_detected) %>%
   unique() %>%
-  filter(count_group == 'count ≥ 5') %>%
+  filter(count_group_median == 'count ≥ 5') %>%
   # to use all val together
   filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
   mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 'pass', 'fail')) %>%
@@ -111,18 +113,18 @@ chisq.test(cont_table)
 
 
 #' OR
-OR = (776/43)/(17/54)
+OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
 OR
 
 
 
 #' # Link with nr of exons
-#' ## Single exon vs multi-exon (n = 723)
+#' ## Single exon vs multi-exon
 #' make count table
 cont_table = cq %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group, nr_exons) %>%
+  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group_median, nr_exons) %>%
   unique() %>%
-  filter(count_group == 'count ≥ 5') %>%
+  filter(count_group_median == 'count ≥ 5') %>%
   # to use all val together
   filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
   mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 'pass', 'fail')) %>%
@@ -154,10 +156,10 @@ chisq.test(cont_table)
 
 
 #' OR
-OR = (562/22)/(121/18)
+OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
 OR
 
-#' ## Is 'exon 1' included in the circRNA? (n = 592)
+#' ## Is 'exon 1' included in the circRNA?
 cq_start = cq %>% 
   mutate(start_exon_nr = substr(start_match, 19, 27),
          start_exon_nr = ifelse(substr(start_exon_nr, 1, 1) == '_',
@@ -166,7 +168,7 @@ cq_start = cq %>%
 cq_start 
 
 cont_table = cq_start %>%
-  filter(count_group == 'count ≥ 5') %>%
+  filter(count_group_median == 'count ≥ 5') %>%
   select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, start_exon_nr) %>%
   unique() %>%
   filter(!is.na(start_exon_nr)) %>%
@@ -187,10 +189,10 @@ cont_table
 #' => not enough values
 #'
 
-#' # Canonical splicing (n = 722)
+#' # Canonical splicing
 
 cont_table = cq %>%
-  filter(count_group == 'count ≥ 5',
+  filter(count_group_median == 'count ≥ 5',
          !strand == 'unknown') %>%
   select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, ss_motif) %>%
   unique() %>%
@@ -224,15 +226,15 @@ chisq.test(cont_table)$expected
 chisq.test(cont_table)
 
 #' OR
-OR = (565/46)/(79/32)
+OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
 OR
 
 
 
-#' # Known annotation (n = 891)
+#' # Known annotation
 
 cont_table = cq %>%
-  filter(count_group == "count ≥ 5") %>%
+  filter(count_group_median == "count ≥ 5") %>%
   select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, ENST) %>%
   unique() %>%
   # to use all val together
@@ -265,13 +267,13 @@ chisq.test(cont_table)$expected
 chisq.test(cont_table)
 
 #' OR
-OR = (757/48)/(37/49)
+OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
 OR
 
-#' # CircRNA detection tool approach (n = 798)
+#' # CircRNA detection tool approach
 
 cont_table = cq %>%
-  filter(count_group == "count ≥ 5") %>%
+  filter(count_group_median == "count ≥ 5") %>%
   left_join(read_tsv('../data/details/tool_annotation.txt')) %>%
   select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, approach) %>%
   filter(!approach == 'integrative') %>%
@@ -305,24 +307,23 @@ chisq.test(cont_table)$expected
 chisq.test(cont_table)
 
 #' OR
-OR = (170/11)/(533/84)
+OR = (cont_table[1,2]/cont_table[1,1])/(cont_table[2,2]/cont_table[2,1])
 OR
 
-#' # BSJ count group (n = 1042)
+#' # BSJ count group
 cont_table = cq %>%
-  filter(!count_group == "no_counts") %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group) %>%
+  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group_median) %>%
   unique() %>%
   # to use all val together
   filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
   mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 
                           'pass', 'fail')) %>%
   # change nr of databases to binary
-  group_by(count_group) %>%
+  group_by(count_group_median) %>%
   count(all_val) %>%
   pivot_wider(values_from = n, names_from = all_val) %>%
   ungroup() %>%
-  select(-count_group)
+  select(-count_group_median)
 
 
 cont_table = as.data.frame(cont_table)
@@ -342,22 +343,20 @@ chisq.test(cont_table)$expected
 chisq.test(cont_table)
 
 #' OR
-OR = (793/97)/(113/39)
+OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
 OR
 
 #' # Using sensitivity
 #' 
 
 tool_anno = read_tsv('../data/details/tool_annotation.txt')
-val = read_tsv('../data/Supplementary_Table_4_precision_values.txt')
+sens = read_tsv('../data/Supplementary_Table_5_sensitivity_values.txt')
 
 #' add annotation to sensitivity
-sens_anno = val %>% 
-  group_by(tool) %>%
-  slice(1) %>%
-  select(tool, sensitivity) %>%
+sens_anno = sens %>% 
   left_join(tool_anno) %>%
-  select(-tool_lt) %>% ungroup()
+  select(-tool_lt) %>% ungroup() %>%
+  filter(count_group_median == 'count ≥ 5')
 
 sens_anno
 
@@ -433,18 +432,15 @@ wilcox.test(sensitivity ~ BSJ_filter, data=sens_anno)
 #' ## Correlation estimated sensitivity and theoretical nr of TPs
 
 val_cor = val %>%
+  # use perc_compound_val
+  select(tool, count_group, perc_compound_val) %>%
+  # get the number of detected circRNAs for each cell line and tool, per count group
   left_join(all_circ %>%
-              group_by(cell_line, tool) %>%
-              summarise(n = n()) %>%
-              pivot_wider(names_from = cell_line,
-                          values_from = n)) %>%
-  select(tool, count_group, perc_compound_val, HLF, `NCI-H23`, SW480, sensitivity) %>%
-  mutate(HLF = perc_compound_val * HLF,
-         `NCI-H23` = perc_compound_val * `NCI-H23`,
-         SW480 = perc_compound_val * SW480) %>%
-  pivot_longer(cols = c(HLF, `NCI-H23`, SW480),
-               values_to = "theo_TP_all",
-               names_to = "cell_line") %>%
+              group_by(cell_line, tool, count_group) %>%
+              summarise(total_n_ut = n())) %>%
+  # calculate the theoretical nr of validated circ
+  mutate(theo_TP_all = perc_compound_val * total_n_ut) %>%
+  left_join(sens, by = c('count_group' = 'count_group_median', 'tool')) %>%
   group_by(tool, count_group, perc_compound_val, sensitivity) %>%
   summarize(theo_TP_all_cl = sum(theo_TP_all)) %>% ungroup()
 

@@ -128,7 +128,7 @@ combo
 
 #' save as a dataframe for Supplementary table 5
 
-combo %>% write_tsv('../data/Supplementary_Table_5_combo_2tools.txt')
+combo %>% write_tsv('../data/Supplementary_Table_6_combo_2tools.txt')
 
 
 #' # Three tools
@@ -224,4 +224,4 @@ combo_3 = combo_3 %>%
   filter(!nchar(tool_combo) == 2)
 
 #' save as a dataframe for figures
-combo_3 %>% write_tsv('../data/Supplementary_Table_6_combo_3tools.txt')
+combo_3 %>% write_tsv('../data/Supplementary_Table_7_combo_3tools.txt')
