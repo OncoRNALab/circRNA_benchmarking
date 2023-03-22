@@ -35,6 +35,8 @@ all_circ
 
 cq = read_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
 
+sens = read_tsv('../data/Supplementary_Table_6B_sensitivity_values.txt')
+
 
 #' # How many transcripts have circRNAs?
 #' ENST
@@ -106,3 +108,13 @@ all_circ %>%
   nrow()
 
 round((190314-174009)/174009, 3)
+
+#' # Sensitivity numbers
+
+sens %>%
+  filter(!count_group_median == 'count ≥ 5') %>%
+  filter(!tool == 'circRNA_finder',
+         !tool == 'segemehl') %>%
+  pull(sensitivity) %>%
+  quantile()
+

@@ -55,7 +55,7 @@ mytheme_discrete_x = mytheme +
 #' ## Read data and order
 all_circ = read_tsv('../data/Supplementary_Table_2_all_circRNAs.txt')
 cq = read_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
-val = read_tsv('../data/Supplementary_Table_4_precision_values.txt')
+val = read_tsv('../data/Supplementary_Table_6A_precision_values.txt')
 
 val$tool = factor(val$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl")) 
 

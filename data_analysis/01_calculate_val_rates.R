@@ -121,8 +121,8 @@ all_circ
 cq = cq %>%
   left_join(all_circ) 
 
-cq %>%
-  write_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
+# cq %>%
+#   write_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
 
 #' # Calculate val rates (precision) per method per tool
 perc_val = cq %>% 
@@ -137,7 +137,7 @@ perc_val = cq %>%
             nr_amp_total = n() - sum(is.na(amp_seq_val)),  # here NA are the ones 'not_included'
             nr_amp_fail = sum(amp_seq_val == "fail", na.rm = T),
             nr_amp_val = sum(amp_seq_val == "pass", na.rm = T),
-            nr_compound_total = n() - sum(is.na(amp_seq_val)), # here NA are the ones 'not_included
+            nr_compound_total = n() - sum(is.na(amp_seq_val)), # here NA are the ones 'not_included'
             nr_compound_fail = sum(compound_val == "fail", na.rm = T),
             nr_compound_val = sum(compound_val == "pass", na.rm = T)) %>%
   mutate(perc_qPCR_val = nr_qPCR_val/nr_qPCR_total,
@@ -148,7 +148,7 @@ perc_val = cq %>%
 
 perc_val
 
-perc_val %>% write_tsv('../data/Supplementary_Table_4_precision_values.txt')
+#perc_val %>% write_tsv('../data/Supplementary_Table_6A_precision_values.txt')
 
 
 
@@ -180,9 +180,7 @@ perc_val %>%
 
 nr_val = cq %>% 
   # get set of uniquely validated circRNAs
-  filter(qPCR_val == 'pass',
-         RR_val == 'pass',
-         amp_seq_val == 'pass') %>%
+  filter(compound_val == 'pass') %>%
   select(circ_id, cell_line, count_group_median) %>% unique() %>%
   count(count_group_median) %>%
   rename(nr_expected = n)
@@ -192,9 +190,7 @@ nr_val
 #' then calculate sensitivity by dividing nr of circ found by total
 sens = cq %>% 
   # get set of uniquely validated circRNAs
-  filter(qPCR_val == 'pass',
-         RR_val == 'pass',
-         amp_seq_val == 'pass') %>%
+  filter(compound_val == 'pass') %>%
   select(circ_id, cell_line, count_group_median) %>% unique() %>%
   # check witch tools have detected these
   left_join(all_circ %>%
@@ -208,10 +204,39 @@ sens = cq %>%
 sens
 
 
-#' # Save dataframe (Sup Table 4)
-sens %>% write_tsv('../data/Supplementary_Table_5_sensitivity_values.txt')
+#' # Save dataframe (Sup Table 6B)
+#sens %>% write_tsv('../data/Supplementary_Table_6B_sensitivity_values.txt')
 
+#' # Make dataframe with all info per tool and ranking
 
+val_sens_df = perc_val %>%
+  select(tool, count_group, perc_qPCR_val, perc_RR_val, perc_amp_val, perc_compound_val) %>%
+  full_join(sens %>% rename(count_group = count_group_median) %>%
+              select(-nr_detected, -nr_expected) %>%
+              mutate(count_group = ifelse(tool == "Sailfish-cir", 'no_counts', count_group))) %>%
+  full_join(all_circ %>%
+              group_by(tool, count_group) %>% count()) %>%
+  group_by(count_group) %>%
+  mutate(qPCR_precision_rank = dense_rank(desc(perc_qPCR_val))) %>%
+  mutate(RR_precision_rank = dense_rank(desc(perc_RR_val))) %>%
+  mutate(amp_precision_rank = dense_rank(desc(perc_amp_val))) %>%
+  mutate(compound_precision_rank = dense_rank(desc(perc_compound_val))) %>%
+  mutate(sensitivity_rank = dense_rank(desc(sensitivity))) %>%
+  mutate(nr_circ_rank = dense_rank(desc(n))) %>% 
+  ungroup() %>%
+  filter(!is.na(n)) %>% 
+  select(tool, count_group, n,	nr_circ_rank, perc_qPCR_val, qPCR_precision_rank,
+         perc_RR_val, RR_precision_rank, perc_amp_val, amp_precision_rank,
+         perc_compound_val, compound_precision_rank, sensitivity, sensitivity_rank) %>%
+  arrange(desc(count_group), desc(sensitivity)) %>%
+  rename(nr_circ_detected = n, qPCR_precision = perc_qPCR_val,
+         RR_precision = perc_RR_val, amp_precision = perc_amp_val,
+         compound_precision = perc_compound_val) 
+
+val_sens_df
+
+# val_sens_df %>%
+#   write_tsv('../data/Supplementary_Table_6_tool_ranking.txt')
 
 #' # Overall validation rates (ignoring tools)
 #' ## Calculate overall validation rates
@@ -331,3 +356,33 @@ round((63+136)/(63+136+61), digits = 3)
 
 round(136/(63+136), digits = 3)
 
+
+#' # RNase R enrichment calculations
+
+#' calculate enrichment
+
+all_circ_treated = read_tsv('../data/Supplementary_Table_4_all_circRNAs_treated.txt')
+
+treatment = all_circ %>%
+  rename(count_UT = BSJ_count) %>% 
+  select(chr, start, end, strand, cell_line, tool, circ_id, circ_id_strand, count_UT, count_group) %>%
+  full_join(all_circ_treated %>% 
+              rename(count_T = BSJ_count) %>%
+              select(chr, start, end, strand, cell_line, tool, circ_id, circ_id_strand, count_T))
+
+treatment
+
+treatment = treatment %>%
+  left_join(read_tsv('../data/details/nr_reads.txt') %>% 
+              select(-RNA_id) %>%
+              pivot_wider(names_from = RNaseR, values_from = nr_reads) %>%
+              rename(nr_reads_T = treated, nr_reads_UT = untreated)) %>%
+  # calculate CPMs and enrichment factor (Sailfish-cir is already TPM)
+  mutate(cpm_T = ifelse(tool == 'Sailfish-cir', count_T, 1000000 * count_T/nr_reads_T), 
+         cpm_UT = ifelse(tool == 'Sailfish-cir', count_UT, 1000000 * count_UT/nr_reads_UT),
+         enrichment = cpm_T/cpm_UT,
+         enrichment_bin = ifelse(enrichment > 1, 'enriched', 'not enriched'),
+         enrichment_bin = ifelse(is.na(count_T), 'count treated NA', enrichment_bin),
+         enrichment_bin = ifelse(is.na(count_UT), 'count untreated NA', enrichment_bin))
+
+#treatment %>% write_tsv('../data/Supplementary_Table_5_RNase_R_enrichment_seq.txt')

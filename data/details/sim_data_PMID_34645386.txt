@@ -1,0 +1,14 @@
+dataset	tool_original	nr_detected	nr_FP	nr_TP	sensitivity	precision	tool
+mix1	Circall	5644	10	5634	0.9006	0.9982	Circall
+mix1	CIRI2	5661	15	5646	0.9025	0.9974	CIRI2
+mix1	Mapsplice	4822	2	4820	0.7705	0.9996	Mapsplice
+mix1	CIRCexplorer	5631	25	5606	0.8961	0.9956	CIRCexplorer3
+mix2	Circall	6503	869	5634	0.9006	0.8664	Circall
+mix2	CIRI2	6531	885	5646	0.9025	0.8645	CIRI2
+mix2	Mapsplice	5603	782	4821	0.7706	0.8604	Mapsplice
+mix2	CIRCexplorer	6522	917	5605	0.8959	0.8594	CIRCexplorer3
+mix3	Circall	5940	79	5861	0.9369	0.9867	Circall
+mix3	CIRI2	6062	163	5912	0.9429	0.9731	CIRI2
+mix3	Mapsplice	5148	1	5130	0.8227	0.9998	Mapsplice
+mix3	CIRCexplorer	5414	39	5372	0.8592	0.9928	CIRCexplorer3
+mix3	find circ	5729	184	5545	0.8863	0.9679	find_circ

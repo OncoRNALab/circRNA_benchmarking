@@ -59,7 +59,7 @@ mytheme_discrete_x = mytheme +
 #' ## Read data and order
 cq = read_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
 all_circ = read_tsv('../data/Supplementary_Table_2_all_circRNAs.txt')
-val = read_tsv('../data/Supplementary_Table_4_precision_values.txt')
+val = read_tsv('../data/Supplementary_Table_6A_precision_values.txt')
 
 all_circ$tool = factor(all_circ$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl"))
 
@@ -77,125 +77,8 @@ all_circ
 #' see panel 2 scripts
 #'
 
-#' # Sup Figure 2: number of circRNAs with canonical linear annotation match
-all_circ_enst = all_circ  %>%
-  mutate(ENST_group = ifelse(is.na(ENST), NA, 'one match'),
-         ENST_group = ifelse(ENST == 'ambiguous', 'ambiguous', ENST_group)) 
 
-all_circ_enst$ENST_group = factor(all_circ_enst$ENST_group, levels = c('one match', 'ambiguous', NA))
-
-all_circ_enst %>%
-  ggplot(aes(tool, fill = ENST_group)) +
-  geom_bar(position = 'fill') +
-  mytheme_discrete_x +
-  theme(legend.position = "right") +
-  ylab('% of circRNAs') + 
-  xlab('') +
-  scale_y_continuous(labels = scales::percent_format()) +
-  scale_fill_manual(name = "",
-                    values = c('#F0E442', '#CC79A7', '#99999'))
-
-#ggsave('sup_figures/sup_figure_2.pdf',  width = 18, height = 13, units = "cm")
-
-#' calculations
-all_circ_enst %>%
-  select(chr, start, end, strand, ENST_group) %>% unique() %>%
-  count(ENST_group)
-
-round(100 * 216483 / (216483 + 41683 + 144782), 1)
-round(100 * 41683 / (216483 + 41683 + 144782), 1)
-round(100 * 144782 / (216483 + 41683 + 144782), 1)
-
-#' # Sup Figure 3: distribution of estimated circRNA length
-all_circ %>% 
-  mutate(estim_len_ex = end - start,
-         len_type = 'including all exons and introns') %>%
-  bind_rows(all_circ %>% 
-              filter(!estim_len_ex == 'ambiguous',
-                     !is.na(estim_len_ex)) %>%
-              mutate(estim_len_ex = as.numeric(estim_len_ex),
-                     len_type = 'including all exons')) %>%
-  ggplot(aes(tool, estim_len_ex, color = len_type)) +
-  geom_boxplot(outlier.shape=NA, lwd = 1/.pt) +
-  mytheme_discrete_x +
-  scale_color_manual(values = c( '#CC79A7', '#E69F00')) +
-  theme(legend.title = element_blank(), legend.position = 'right') + 
-  scale_y_log10(labels = scales::comma_format(), expand = expansion(mult = 0.5)) +
-  coord_cartesian(ylim = c(50, 110000)) +
-  ylab("estimated length of circRNAs")  +
-  theme(axis.title.x=element_blank())
-
-
-#ggsave('sup_figures/sup_figure_3.pdf', width = 20, height = 10, units = "cm")
-
-#' # Sup Figure 4: number of exons per circRNA per tool
-all_circ_exons = all_circ %>%
-  filter(!nr_exons == 'ambiguous') %>%
-  mutate(nr_exons = as.numeric(nr_exons),
-         exon_group = ifelse(nr_exons == 1, 'single exon', NA),
-         exon_group = ifelse(nr_exons > 1, '2-5 exons', exon_group),
-         exon_group = ifelse(nr_exons > 5, '6-9 exons', exon_group),
-         exon_group = ifelse(nr_exons > 9, '≥ 10 exons', exon_group),
-         nr_exons = as.character(nr_exons)) %>%
-  bind_rows(all_circ %>%
-              filter(nr_exons == 'ambiguous') %>%
-              mutate(exon_group = ifelse(nr_exons == "ambiguous", 'ambiguous', exon_group))) %>%
-  bind_rows(all_circ %>%
-              filter(is.na(nr_exons)) %>%
-              mutate(exon_group = NA))
-
-all_circ_exons %>% filter(exon_group == "ambiguous")
-
-all_circ_exons$exon_group = factor(all_circ_exons$exon_group, 
-                                   levels = c('≥ 10 exons', '6-9 exons', '2-5 exons', 'single exon', 'ambiguous', NA))
-all_circ_exons$tool = factor(all_circ_exons$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl")) 
-
-
-all_circ_exons %>%
-  #filter(!exon_group == 'ambiguous', !is.na(exon_group)) %>%
-  ggplot(aes(tool, fill = exon_group)) +
-  geom_bar(position = 'fill') +
-  mytheme_discrete_x +
-  scale_y_continuous(labels = scales::percent_format()) +
-  scale_fill_manual(name = "circRNAs with ...",
-                    values = c("#0072B2", '#00B9F2', '#00A875', "#E69F00", '#CC79A7', '#99999')) +
-  theme(legend.position = NULL) +
-  xlab('') +
-  ylab('')
-
-#ggsave('sup_figures/sup_figure_4.pdf',  width = 18, height = 13, units = "cm")
-
-
-#' # Sup Figure 5: nr of circRNAs on both strands per tool
-#' first calculate strand distribution linear genes
-ens = read_tsv('~/Documents/PhD/indexes/Homo_sapiens.GRCh38.103.genes.gtf') %>%
-  select(gene_id, strand) %>%
-  rename(circ_id = gene_id) %>%
-  mutate(tool = 'lineair genes',
-         tool_group = 'lin')
-
-ens
-
-all_circ_strand = all_circ %>%
-  mutate(tool_group = 'circ') %>%
-  bind_rows(ens) 
-
-all_circ_strand$tool = factor(all_circ_strand$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl", 'lineair genes')) 
-
-all_circ_strand %>%
-  ggplot(aes(tool, fill = strand)) +
-  geom_bar(position = 'fill') +
-  ylab('% of circRNAs') +
-  scale_y_continuous(labels = scales::percent_format()) +
-  xlab('') +
-  facet_grid(~tool_group, scales = 'free_x', space = 'free') +
-  scale_fill_manual(values = c('#009E73', '#CC79A7' , '#5AB4E5')) +
-  mytheme_discrete_x +
-  theme(legend.position = 'right')
-
-#ggsave('sup_figures/sup_figure_5.pdf',  width = 20, height = 12, units = "cm")
-
-#'# Sup Figure 6: circRNA BSJ count distribution per tool
+#'# Sup Figure 2: circRNA BSJ count distribution per tool
 
 all_circ %>% 
   mutate(tool_group = ifelse(tool == "Sailfish-cir", 'sfc', 'other')) %>%
@@ -207,10 +90,10 @@ all_circ %>%
   facet_wrap(~tool_group, scales = 'free') +
   mytheme_discrete_x
 
-#ggsave('sup_figures/sup_figure_6.pdf',  width = 20, height = 12, units = "cm")
+#ggsave('sup_figures/sup_figure_2.pdf',  width = 20, height = 12, units = "cm")
 
 
-#' # Sup Figure 7: correlation between BSJ counts from one circRNA detected by different tools
+#' # Sup Figure 3: correlation between BSJ counts from one circRNA detected by different tools
 
 count_conc = tibble()
 for (tool_1 in val %>% pull(tool) %>% unique()){
@@ -284,22 +167,22 @@ count_conc_lm %>%
   geom_vline(xintercept = 1, color = 'grey') +
   coord_fixed(ratio = 1)
 
-#ggsave('sup_figures/sup_figure_7.pdf', width = 10, height = 15, units = "cm")
+#ggsave('sup_figures/sup_figure_3.pdf', width = 10, height = 15, units = "cm")
 
 # get median value
 count_conc_lm %>% pull(slope) %>% quantile()
 count_conc_lm %>% pull(R_squared) %>% quantile()
 
-#' # Sup Figure 8: number of tools by which the circRNA is detected
+#' # Sup Figure 4: number of tools by which the circRNA is detected
 #' see panel 2 script
 #' 
 
-#' # Sup Figure 9: Jaccard distance between tools (heatmap)
+#' # Sup Figure 5: Jaccard distance between tools (heatmap)
 #' Heatmap based on counts
 #' here only for count ≥ 5 (in sup figure for all circ)
 #' calculate Jaccard index 
 
-jac = read_tsv("../data/Supplementary_Table_5_combo_2tools.txt") %>%
+jac = read_tsv("../data/Supplementary_Table_7_combo_2tools.txt") %>%
   filter(cell_line == 'HLF') %>%
   mutate(jac_index = nr_intersection/nr_union,
          jac_dist = 1 - jac_index) # calculate jac index and distance
@@ -318,14 +201,14 @@ count_matrix = as.matrix(count_table)
 rownames(count_matrix) = rn
  
 
-# pdf("../supplemental/sup_figures/sup_figure_9.pdf", height=8, width=12)
+# pdf("../supplemental/sup_figures/sup_figure_5.pdf", height=8, width=12)
 heatmap.2(count_matrix,
           main = "HLF - bin - Jaccard",
           trace = "none", density.info = "none")
 # dev.off()
 
 
-#' # Sup Figure 10: number of databases that also report that circRNA
+#' # Sup Figure 6: number of databases that also report that circRNA
 all_circ_db = all_circ %>%
   mutate(n_db_group = ifelse(n_db == 1, '1 database', '0 databases'),
          n_db_group = ifelse(n_db > 1, '2-5 databases', n_db_group),
@@ -348,7 +231,7 @@ all_circ_db %>%
                     values = c("#0072B2", '#00B9F2', '#00A875', "#E69F00", "#CC79A7")) +
   mytheme_discrete_x
 
-#ggsave('sup_figures/sup_figure_10.pdf',  width = 20, height = 9, units = "cm")
+#ggsave('sup_figures/sup_figure_6.pdf',  width = 20, height = 9, units = "cm")
 
 
 #' numbers for paper
@@ -367,3 +250,120 @@ all_circ_db %>%
   summarise(perc_db = sum(is.na(n_db)) / n()) %>% arrange(perc_db) %>%
   pull(perc_db) %>% quantile()
 
+#' # Sup Figure 7: number of circRNAs with canonical linear annotation match
+all_circ_enst = all_circ  %>%
+  mutate(ENST_group = ifelse(is.na(ENST), NA, 'one match'),
+         ENST_group = ifelse(ENST == 'ambiguous', 'ambiguous', ENST_group)) 
+
+all_circ_enst$ENST_group = factor(all_circ_enst$ENST_group, levels = c('one match', 'ambiguous', NA))
+
+all_circ_enst %>%
+  ggplot(aes(tool, fill = ENST_group)) +
+  geom_bar(position = 'fill') +
+  mytheme_discrete_x +
+  theme(legend.position = "right") +
+  ylab('% of circRNAs') + 
+  xlab('') +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(name = "",
+                    values = c('#F0E442', '#CC79A7', '#99999'))
+
+#ggsave('sup_figures/sup_figure_7.pdf',  width = 18, height = 13, units = "cm")
+
+#' calculations
+all_circ_enst %>%
+  select(chr, start, end, strand, ENST_group) %>% unique() %>%
+  count(ENST_group)
+
+round(100 * 216483 / (216483 + 41683 + 144782), 1)
+round(100 * 41683 / (216483 + 41683 + 144782), 1)
+round(100 * 144782 / (216483 + 41683 + 144782), 1)
+
+#' # Sup Figure 8: distribution of estimated circRNA length
+all_circ %>% 
+  mutate(estim_len_ex = end - start,
+         len_type = 'including all exons and introns') %>%
+  bind_rows(all_circ %>% 
+              filter(!estim_len_ex == 'ambiguous',
+                     !is.na(estim_len_ex)) %>%
+              mutate(estim_len_ex = as.numeric(estim_len_ex),
+                     len_type = 'including all exons')) %>%
+  ggplot(aes(tool, estim_len_ex, color = len_type)) +
+  geom_boxplot(outlier.shape=NA, lwd = 1/.pt) +
+  mytheme_discrete_x +
+  scale_color_manual(values = c( '#CC79A7', '#E69F00')) +
+  theme(legend.title = element_blank(), legend.position = 'right') + 
+  scale_y_log10(labels = scales::comma_format(), expand = expansion(mult = 0.5)) +
+  coord_cartesian(ylim = c(50, 110000)) +
+  ylab("estimated length of circRNAs")  +
+  theme(axis.title.x=element_blank())
+
+
+#ggsave('sup_figures/sup_figure_8.pdf', width = 20, height = 10, units = "cm")
+
+#' # Sup Figure 9: number of exons per circRNA per tool
+all_circ_exons = all_circ %>%
+  filter(!nr_exons == 'ambiguous') %>%
+  mutate(nr_exons = as.numeric(nr_exons),
+         exon_group = ifelse(nr_exons == 1, 'single exon', NA),
+         exon_group = ifelse(nr_exons > 1, '2-5 exons', exon_group),
+         exon_group = ifelse(nr_exons > 5, '6-9 exons', exon_group),
+         exon_group = ifelse(nr_exons > 9, '≥ 10 exons', exon_group),
+         nr_exons = as.character(nr_exons)) %>%
+  bind_rows(all_circ %>%
+              filter(nr_exons == 'ambiguous') %>%
+              mutate(exon_group = ifelse(nr_exons == "ambiguous", 'ambiguous', exon_group))) %>%
+  bind_rows(all_circ %>%
+              filter(is.na(nr_exons)) %>%
+              mutate(exon_group = NA))
+
+all_circ_exons %>% filter(exon_group == "ambiguous")
+
+all_circ_exons$exon_group = factor(all_circ_exons$exon_group, 
+                                   levels = c('≥ 10 exons', '6-9 exons', '2-5 exons', 'single exon', 'ambiguous', NA))
+all_circ_exons$tool = factor(all_circ_exons$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl")) 
+
+
+all_circ_exons %>%
+  #filter(!exon_group == 'ambiguous', !is.na(exon_group)) %>%
+  ggplot(aes(tool, fill = exon_group)) +
+  geom_bar(position = 'fill') +
+  mytheme_discrete_x +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(name = "circRNAs with ...",
+                    values = c("#0072B2", '#00B9F2', '#00A875', "#E69F00", '#CC79A7', '#99999')) +
+  theme(legend.position = NULL) +
+  xlab('') +
+  ylab('')
+
+#ggsave('sup_figures/sup_figure_9.pdf',  width = 18, height = 13, units = "cm")
+
+
+#' # Sup Figure 10: nr of circRNAs on both strands per tool
+#' first calculate strand distribution linear genes
+ens = read_tsv('~/Documents/PhD/indexes/Homo_sapiens.GRCh38.103.genes.gtf') %>%
+  select(gene_id, strand) %>%
+  rename(circ_id = gene_id) %>%
+  mutate(tool = 'lineair genes',
+         tool_group = 'lin')
+
+ens
+
+all_circ_strand = all_circ %>%
+  mutate(tool_group = 'circ') %>%
+  bind_rows(ens) 
+
+all_circ_strand$tool = factor(all_circ_strand$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl", 'lineair genes')) 
+
+all_circ_strand %>%
+  ggplot(aes(tool, fill = strand)) +
+  geom_bar(position = 'fill') +
+  ylab('% of circRNAs') +
+  scale_y_continuous(labels = scales::percent_format()) +
+  xlab('') +
+  facet_grid(~tool_group, scales = 'free_x', space = 'free') +
+  scale_fill_manual(values = c('#009E73', '#CC79A7' , '#5AB4E5')) +
+  mytheme_discrete_x +
+  theme(legend.position = 'right')
+
+#ggsave('sup_figures/sup_figure_10.pdf',  width = 20, height = 12, units = "cm")

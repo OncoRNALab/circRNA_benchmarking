@@ -31,29 +31,29 @@ conflict_prefer('intersect', 'dplyr')
 #' ## Read data
 cq = read_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
 all_circ = read_tsv("../data/Supplementary_Table_2_all_circRNAs.txt")
-val = read_tsv('../data/Supplementary_Table_4_precision_values.txt')
+val = read_tsv('../data/Supplementary_Table_6A_precision_values.txt')
 
 cq
 all_circ
 
 
-#' # Presence in db
+#' # Precision
+#' ## Presence in db
 #' make count table
 cont_table = cq %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group_median, n_db) %>%
-  unique() %>%
+  select(circ_id, cell_line, compound_val, count_group_median, n_db) %>%
   # only keep high abundant circRNAs
   filter(count_group_median == 'count ≥ 5') %>%
-  # to use all val together
-  filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
-  mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 'pass', 'fail')) %>%
+  # filter out circ that are NAs for amplicon sequencing validation
+  filter(!is.na(compound_val)) %>%
   # change nr of databases to binary
   mutate(n_db = ifelse(is.na(n_db), 0, 1)) %>%
   group_by(n_db) %>%
-  count(all_val) %>%
-  pivot_wider(values_from = n, names_from = all_val) %>%
+  count(compound_val) %>%
+  pivot_wider(values_from = n, names_from = compound_val)  %>%
   ungroup() %>%
   select(-n_db)
+
 
 
 cont_table = as.data.frame(cont_table)
@@ -77,20 +77,19 @@ OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
 OR
 
 
-#' # Link with detected by multiple tools
+#' ## Link with detected by multiple tools
 #' make count table
 cont_table = cq %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group_median, n_detected) %>%
+  select(circ_id, cell_line, compound_val, count_group_median, n_detected) %>%
   unique() %>%
   filter(count_group_median == 'count ≥ 5') %>%
-  # to use all val together
-  filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
-  mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 'pass', 'fail')) %>%
-  # change nr of databases to binary
+  # filter out NAs
+  filter(!is.na(compound_val)) %>%
+  # change nr of tools to binary
   mutate(n_detected = ifelse(n_detected == 1, 0, 1)) %>%
   group_by(n_detected) %>%
-  count(all_val) %>%
-  pivot_wider(values_from = n, names_from = all_val) %>%
+  count(compound_val) %>%
+  pivot_wider(values_from = n, names_from = compound_val) %>%
   ungroup() %>%
   select(-n_detected)
 
@@ -118,22 +117,21 @@ OR
 
 
 
-#' # Link with nr of exons
-#' ## Single exon vs multi-exon
+#' ## Link with nr of exons
+#' ### Single exon vs multi-exon
 #' make count table
 cont_table = cq %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group_median, nr_exons) %>%
+  select(circ_id, cell_line, compound_val, count_group_median, nr_exons) %>%
   unique() %>%
   filter(count_group_median == 'count ≥ 5') %>%
-  # to use all val together
-  filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
-  mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 'pass', 'fail')) %>%
+  # filter out NAs
+  filter(!is.na(compound_val)) %>%
   # also remove the ones that do not have a exon annotation
   filter(!is.na(nr_exons), !nr_exons == "ambiguous") %>%
   mutate(exon_bin = ifelse(nr_exons == 1, 0, 1)) %>%
   group_by(exon_bin) %>%
-  count(all_val) %>% 
-  pivot_wider(values_from = n, names_from = all_val) %>%
+  count(compound_val) %>% 
+  pivot_wider(values_from = n, names_from = compound_val) %>%
   ungroup() %>%
   mutate(fail = ifelse(is.na(fail), 0, fail)) %>%
   select(-exon_bin)
@@ -159,7 +157,7 @@ chisq.test(cont_table)
 OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
 OR
 
-#' ## Is 'exon 1' included in the circRNA?
+#' ### Is 'exon 1' included in the circRNA?
 cq_start = cq %>% 
   mutate(start_exon_nr = substr(start_match, 19, 27),
          start_exon_nr = ifelse(substr(start_exon_nr, 1, 1) == '_',
@@ -169,18 +167,15 @@ cq_start
 
 cont_table = cq_start %>%
   filter(count_group_median == 'count ≥ 5') %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, start_exon_nr) %>%
+  select(circ_id, cell_line, compound_val, start_exon_nr) %>%
   unique() %>%
   filter(!is.na(start_exon_nr)) %>%
   mutate(exon_1 = ifelse(start_exon_nr == "exon_1", 1, 0)) %>%
-  # to use all val together
-  filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
-  mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 
-                          'pass', 'fail')) %>%
-  # change nr of databases to binary
+  # filter out NAs
+  filter(!is.na(compound_val)) %>%
   group_by(exon_1) %>%
-  count(all_val) %>%
-  pivot_wider(values_from = n, names_from = all_val) %>%
+  count(compound_val) %>%
+  pivot_wider(values_from = n, names_from = compound_val) %>%
   ungroup() 
 
 
@@ -189,22 +184,20 @@ cont_table
 #' => not enough values
 #'
 
-#' # Canonical splicing
+#' ## Canonical splicing
 
 cont_table = cq %>%
   filter(count_group_median == 'count ≥ 5',
          !strand == 'unknown') %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, ss_motif) %>%
+  select(circ_id, cell_line, compound_val, ss_motif) %>%
   unique() %>%
   mutate(ss_can = ifelse(ss_motif == "AGNGT", 1, 0)) %>%
-  # to use all val together
-  filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
-  mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 
-                          'pass', 'fail')) %>%
+  # filter out NAs
+  filter(!is.na(compound_val)) %>%
   # change nr of databases to binary
   group_by(ss_can) %>%
-  count(all_val) %>%
-  pivot_wider(values_from = n, names_from = all_val) %>%
+  count(compound_val) %>%
+  pivot_wider(values_from = n, names_from = compound_val) %>%
   ungroup() %>%
   select(-ss_can)
 
@@ -231,21 +224,20 @@ OR
 
 
 
-#' # Known annotation
+#' ## Known annotation
 
 cont_table = cq %>%
   filter(count_group_median == "count ≥ 5") %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, ENST) %>%
+  select(circ_id, cell_line, compound_val, ENST) %>%
   unique() %>%
-  # to use all val together
-  filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
-  mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 
-                          'pass', 'fail'),
-         ENST_group = ifelse(is.na(ENST), 'no_match', "match")) %>% 
+  # filter out NAs
+  filter(!is.na(compound_val)) %>%
+  # make ENST match binary
+  mutate(ENST_group = ifelse(is.na(ENST), 'no_match', "match")) %>% 
   # change nr of databases to binary
   group_by(ENST_group) %>%
-  count(all_val) %>%
-  pivot_wider(values_from = n, names_from = all_val) %>%
+  count(compound_val) %>%
+  pivot_wider(values_from = n, names_from = compound_val) %>%
   ungroup() %>%
   select(-ENST_group)
 
@@ -267,25 +259,22 @@ chisq.test(cont_table)$expected
 chisq.test(cont_table)
 
 #' OR
-OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
+OR = (cont_table[1,2]/cont_table[1,1])/(cont_table[2,2]/cont_table[2,1])
 OR
 
-#' # CircRNA detection tool approach
+#' ## CircRNA detection tool approach
 
 cont_table = cq %>%
   filter(count_group_median == "count ≥ 5") %>%
   left_join(read_tsv('../data/details/tool_annotation.txt')) %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, approach) %>%
+  select(circ_id, cell_line, compound_val, approach) %>%
   filter(!approach == 'integrative') %>%
   unique() %>%
-  # to use all val together
-  filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
-  mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 
-                          'pass', 'fail')) %>% 
-  # change nr of databases to binary
+  # filter out NAs
+  filter(!is.na(compound_val)) %>%
   group_by(approach) %>%
-  count(all_val) %>%
-  pivot_wider(values_from = n, names_from = all_val) %>%
+  count(compound_val) %>%
+  pivot_wider(values_from = n, names_from = compound_val) %>%
   ungroup() %>%
   select(-approach)
 
@@ -310,18 +299,15 @@ chisq.test(cont_table)
 OR = (cont_table[1,2]/cont_table[1,1])/(cont_table[2,2]/cont_table[2,1])
 OR
 
-#' # BSJ count group
+#' ## BSJ count group
 cont_table = cq %>%
-  select(circ_id, cell_line, qPCR_val, RR_val, amp_seq_val, count_group_median) %>%
+  select(circ_id, cell_line, compound_val, count_group_median) %>%
   unique() %>%
-  # to use all val together
-  filter(!is.na(amp_seq_val), !is.na(RR_val)) %>%
-  mutate(all_val = ifelse(qPCR_val == RR_val & qPCR_val == amp_seq_val & qPCR_val == 'pass', 
-                          'pass', 'fail')) %>%
-  # change nr of databases to binary
+  # filter out NAs
+  filter(!is.na(compound_val)) %>%
   group_by(count_group_median) %>%
-  count(all_val) %>%
-  pivot_wider(values_from = n, names_from = all_val) %>%
+  count(compound_val) %>%
+  pivot_wider(values_from = n, names_from = compound_val) %>%
   ungroup() %>%
   select(-count_group_median)
 
@@ -346,11 +332,10 @@ chisq.test(cont_table)
 OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
 OR
 
-#' # Using sensitivity
-#' 
+#' # Sensitivity
 
 tool_anno = read_tsv('../data/details/tool_annotation.txt')
-sens = read_tsv('../data/Supplementary_Table_5_sensitivity_values.txt')
+sens = read_tsv('../data/Supplementary_Table_6B_sensitivity_values.txt')
 
 #' add annotation to sensitivity
 sens_anno = sens %>% 
@@ -359,6 +344,8 @@ sens_anno = sens %>%
   filter(count_group_median == 'count ≥ 5')
 
 sens_anno
+
+cq %>% select(circ_id, compound_val, cell_line) %>% unique() %>% count(compound_val)
 
 #' ## Detection approach: segmented read-based VS candidate-based
 wilcox.test(sensitivity ~ approach, data=sens_anno %>% filter(!approach == 'integrative')) 
@@ -454,3 +441,182 @@ cor.test(val_cor_tmp$sensitivity, val_cor_tmp$theo_TP_all_cl, method = 'spearman
 #' above 5
 val_cor_tmp = val_cor %>% filter(count_group == "count ≥ 5")
 cor.test(val_cor_tmp$sensitivity, val_cor_tmp$theo_TP_all_cl, method = 'spearman')
+
+
+
+#' # Cell lines - statistics
+#' ## Chi-squared
+#' make count table
+cont_table = cq %>%
+  select(circ_id, cell_line, compound_val, count_group_median) %>%
+  unique() %>%
+  # only keep high abundant circRNAs
+  filter(count_group_median == 'count ≥ 5') %>%
+  # to use all val together
+  filter(!is.na(compound_val)) %>%
+  # change nr of databases to binary
+  group_by(cell_line) %>%
+  count(compound_val) %>%
+  pivot_wider(values_from = n, names_from = compound_val) %>%
+  ungroup() %>%
+  select(-cell_line)
+
+
+cont_table = as.data.frame(cont_table)
+rownames(cont_table) <- c("HLF", "NCI-H23", "SW480")
+
+cont_table
+
+#' plot data
+mosaicplot(cont_table,
+           main = "Mosaic plot",
+           color = TRUE)
+
+#' if chisquare expected < 5 => then Fisher should be used
+chisq.test(cont_table)$expected
+
+#' chisquare test
+chisq.test(cont_table)
+
+#' ## ANOVA - Sensitivity
+#' first calculate the total nr of validated circ per count group
+
+nr_val_cl = cq %>% 
+  # get set of uniquely validated circRNAs
+  filter(compound_val == 'pass') %>%
+  select(circ_id, cell_line, count_group_median) %>% unique() %>%
+  group_by(count_group_median, cell_line) %>%
+  summarise(nr_expected = n())
+
+nr_val_cl
+
+#' then calculate sensitivity by dividing nr of circ found by total
+sens_cl = cq %>% 
+  # get set of uniquely validated circRNAs
+  filter(compound_val == 'pass') %>%
+  select(circ_id, cell_line, count_group_median) %>% unique() %>%
+  # check witch tools have detected these
+  left_join(all_circ %>%
+              select(tool, circ_id, cell_line) %>% unique()) %>%
+  group_by(tool, count_group_median, cell_line) %>% 
+  summarise(nr_detected = n()) %>%
+  left_join(nr_val_cl) %>%
+  mutate(sensitivity = nr_detected/nr_expected) %>%
+  ungroup()
+
+#' then ANOVA
+sens_cl_anova = sens_cl %>%
+  filter(count_group_median == 'count ≥ 5') %>%
+  select(tool, cell_line, sensitivity)
+
+sens_cl_anova
+
+sens_cl_anova$cell_line = factor(sens_cl_anova$cell_line, levels = c('HLF', 'NCI-H23', 'SW480'))
+sens_cl_anova$tool = factor(sens_cl_anova$tool, levels = c("CIRCexplorer3", "CirComPara2", "circRNA_finder", "circseq_cup",  "CircSplice", "circtools","CIRI2", "CIRIquant", "ecircscreen","find_circ",  "KNIFE",  "NCLcomparator",  "NCLscan", "PFv2","Sailfish-cir", "segemehl"))
+
+res.aov = aov(sensitivity ~ cell_line+tool, data = sens_cl_anova)
+
+summary(res.aov)
+
+0.0036/(0.0036+1.8085+0.0427)
+1.8085/(0.0036+1.8085+0.0427)
+
+
+#' ## ANOVA - precision
+
+#' recalculate the precision per cell line
+val_cl = cq %>% 
+  select(tool, circ_id, cell_line, count_group, qPCR_val, RR_val, RR_val_detail, amp_seq_val, amp_seq_val_detail, compound_val) %>%
+  group_by(tool, count_group, cell_line) %>%
+  summarise(nr_qPCR_total = n(),
+            nr_qPCR_fail = sum(qPCR_val == 'fail'),
+            nr_qPCR_val = sum(qPCR_val == 'pass'),
+            nr_RR_total = n() - sum(is.na(RR_val)),  # here NA are the ones that have are 'out_of_range'
+            nr_RR_fail = sum(RR_val == "fail", na.rm = T),
+            nr_RR_val = sum(RR_val == "pass", na.rm = T),
+            nr_amp_total = n() - sum(is.na(amp_seq_val)),  # here NA are the ones 'not_included'
+            nr_amp_fail = sum(amp_seq_val == "fail", na.rm = T),
+            nr_amp_val = sum(amp_seq_val == "pass", na.rm = T),
+            nr_compound_total = n() - sum(is.na(amp_seq_val)), # here NA are the ones 'not_included
+            nr_compound_fail = sum(compound_val == "fail", na.rm = T),
+            nr_compound_val = sum(compound_val == "pass", na.rm = T)) %>%
+  mutate(perc_qPCR_val = nr_qPCR_val/nr_qPCR_total,
+         perc_RR_val = nr_RR_val/nr_RR_total,
+         perc_amp_val = nr_amp_val/nr_amp_total,
+         perc_compound_val = nr_compound_val/nr_compound_total) %>%
+  ungroup()
+
+#' ANOVA
+val_cl_anova = val_cl %>%
+  filter(count_group == 'count ≥ 5') %>%
+  select(tool, cell_line, perc_qPCR_val, perc_RR_val, perc_amp_val, perc_compound_val)
+
+val_cl_anova
+
+val_cl_anova$cell_line = factor(val_cl_anova$cell_line, levels = c('HLF', 'NCI-H23', 'SW480'))
+val_cl_anova$tool = factor(val_cl_anova$tool, levels = c("CIRCexplorer3", "CirComPara2", "circRNA_finder", "circseq_cup",  "CircSplice", "circtools","CIRI2", "CIRIquant", "ecircscreen","find_circ",  "KNIFE",  "NCLcomparator",  "NCLscan", "PFv2","Sailfish-cir", "segemehl"))
+
+
+#' ### RT-qPCR precision
+res.aov = aov(perc_qPCR_val ~ cell_line+tool, data = val_cl_anova)
+summary(res.aov)
+
+0.008126/(0.008126+0.024932+0.017273)
+0.024932/(0.008126+0.024932+0.017273)
+
+
+#' ### RR precision
+res.aov = aov(perc_RR_val ~ cell_line+tool, data = val_cl_anova)
+summary(res.aov)
+
+0.026300/(0.026300+0.011436+0.003043)
+0.011436/(0.026300+0.011436+0.003043)
+
+
+#' ### ampl seq precision
+res.aov = aov(perc_amp_val ~ cell_line+tool, data = val_cl_anova)
+summary(res.aov)
+
+0.00912/(0.00912+0.09004+0.00279)
+0.09004/(0.00912+0.09004+0.00279)
+
+
+#' ### compound precision
+res.aov = aov(perc_compound_val ~ cell_line+tool, data = val_cl_anova)
+summary(res.aov)
+
+0.06205/(0.06205+0.09406+0.00359)
+0.09406/(0.06205+0.09406+0.00359)
+
+#' # RNase R enrichment in sequencing data
+
+treatment = read_tsv('../data/Supplementary_Table_5_RNase_R_enrichment_seq.txt')
+
+
+cont_table = treatment %>%
+  # remove Sailfish-cir as it does not report counts
+  filter(!tool == 'Sailfish-cir') %>%
+  # remove NAs
+  filter(!is.na(count_UT), !is.na(count_T)) %>%
+  # add median count group
+  left_join(all_circ %>% 
+              select(circ_id_strand, count_group_median, cell_line) %>% unique()) %>%
+  select(circ_id_strand, cell_line, tool, enrichment_bin, count_group_median) %>% 
+  group_by(count_group_median) %>%
+  count(enrichment_bin) %>%
+  pivot_wider(values_from = n, names_from = enrichment_bin) %>%
+  ungroup() %>%
+  select(-count_group_median)
+
+cont_table = as.data.frame(cont_table)
+rownames(cont_table) <- c("count < 5", "count ≥ 5")
+
+cont_table
+
+mosaicplot(cont_table,
+           main = "Mosaic plot",
+           color = TRUE)
+
+chisq.test(cont_table)$expected
+
+chisq.test(cont_table)

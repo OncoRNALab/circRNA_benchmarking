@@ -71,7 +71,7 @@ ggplot(prop_circ, aes(year, query_hits / all_hits)) +
   scale_y_continuous(labels = scales::percent_format())
 
 
-ggsave('separate_figures/figure_1A.pdf',  width = 10, height = 8.5, units = "cm")
+#ggsave('separate_figures/figure_1A.pdf',  width = 10, height = 8.5, units = "cm")
 
 #' calculate CAGR
 

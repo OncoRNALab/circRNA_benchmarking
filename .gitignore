@@ -4,3 +4,5 @@ data/Supplementary_Table_2_all_circRNAs.txt
 */.DS_Store
 */.Rhistory
 figure_generation/separate_figures
+data/Supplementary_Table_4_all_circRNAs_treated.txt
+data/Supplementary_Table_5_RNase_R_enrichment_seq.txt
