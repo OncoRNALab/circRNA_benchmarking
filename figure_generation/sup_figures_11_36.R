@@ -99,7 +99,7 @@ cq_cum
 cq_cum %>% 
   ggplot(aes(BSJ_count, perc_val)) +
   geom_point(size = 1) +
-  geom_vline(xintercept = 5, color = "#D55E00") +
+  geom_vline(xintercept = 5, color = "#999999", linetype = 'dashed') +
   geom_smooth(color = '#5AB4E5') +
   scale_x_continuous(trans='log10') +
   scale_y_continuous(labels = scales::percent, limits = c(0,1)) +
@@ -322,7 +322,7 @@ map_perc_cum_tool %>%
   facet_wrap(~tool) +
   scale_color_manual(values=c( '#56B4E9', '#E69F00', '#999999')) +
   theme(legend.position = 'right') +
-  geom_vline(xintercept = 0.5)
+  geom_vline(xintercept = 0.5, linetype = 'dashed', color = '#999999')
 
 #ggsave('sup_figures/sup_figure_20.pdf',  width = 30, height = 20, units = "cm")
 
@@ -437,15 +437,21 @@ hm %>% count(tool)
 
 #' # Sup Figure 22: compound precision values per tool
 
-val %>% 
+val %>%
+  select(tool, count_group, nr_compound_total, perc_compound_val) %>%
+  mutate(margin = qnorm(0.975)*sqrt(perc_compound_val*(1-perc_compound_val)/nr_compound_total),
+         CI_low = perc_compound_val - margin,
+         CI_up = perc_compound_val + margin) %>% 
   ggplot(aes(tool, perc_compound_val, fill = count_group)) +
   geom_bar(stat = 'identity') +
   mytheme_discrete_x +
   facet_grid(~count_group, scales = 'free_x', space = 'free') +
   scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_manual(values = c('#00B9F2', '#E69F00' , '#999999')) +
+  geom_errorbar(aes(ymin=CI_low, ymax=CI_up), 
+                width=.3, color = 'grey45') +
   xlab('') +
-  ylab('compound precision metric') +
+  ylab('compound precision metric (+/- 95% CI)') +
   theme(legend.position = "")
 
 #ggsave('separate_figures/sup_figure_22.pdf', width = 21, height = 10, units = "cm")

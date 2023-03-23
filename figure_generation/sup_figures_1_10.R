@@ -163,8 +163,8 @@ count_conc_lm %>%
   ggplot(aes(R_squared, slope)) +
   geom_point() +
   mytheme +
-  geom_hline(yintercept = 1, color = 'grey') +
-  geom_vline(xintercept = 1, color = 'grey') +
+  geom_hline(yintercept = 1, color = '#999999', linetype = 'dashed') +
+  geom_vline(xintercept = 1, color = '#999999', linetype = 'dashed') +
   coord_fixed(ratio = 1)
 
 #ggsave('sup_figures/sup_figure_3.pdf', width = 10, height = 15, units = "cm")

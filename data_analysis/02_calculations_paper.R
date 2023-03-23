@@ -94,7 +94,7 @@ all_circ %>%
   filter(!tool == "Sailfish-cir") %>%
   filter(BSJ_count >= 2) %>% nrow()
 
-round(503237/1091901, 3)
+round(503237/(945201+146700), 3)
 
 #' # How many circRNAs are detected on different strands
 all_circ %>% 
@@ -109,12 +109,19 @@ all_circ %>%
 
 round((190314-174009)/174009, 3)
 
-#' # Sensitivity numbers
 
-sens %>%
-  filter(!count_group_median == 'count ≥ 5') %>%
-  filter(!tool == 'circRNA_finder',
-         !tool == 'segemehl') %>%
-  pull(sensitivity) %>%
-  quantile()
+#' # CircRNA numbers
 
+#' nr of circ detected per tool
+all_circ %>%
+  filter(cell_line == 'HLF') %>%
+  group_by(tool) %>%
+  count() %>%
+  arrange(n)
+
+#' nr of unique circ
+all_circ %>% select(circ_id) %>%
+  unique()
+
+#' total nr of circ
+nrow(all_circ)

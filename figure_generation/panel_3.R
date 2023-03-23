@@ -124,7 +124,7 @@ upset(fromList(upset),
       point.size = 2.5, line.size = 1)
 # dev.off()
 
-#' # Figure 3C & Sup Figure 21
+#' # Figure 3C & Sup Figure 25
 #' add total nr of circRNAs and calculate theoretical nr of TP
 val_cl = val %>%
   # use perc_compound_val
@@ -156,5 +156,5 @@ val_cl %>%
   scale_y_continuous(labels = scales::comma_format()) +
   theme(legend.position="none")
 
-#ggsave('separate_figures/sup_figure_21.pdf',  width = 21, height = 24.5, units = "cm")
+#ggsave('separate_figures/sup_figure_25.pdf',  width = 21, height = 24.5, units = "cm")
 #ggsave('separate_figures/figure_3C_alt2.pdf',  width = 21, height = 8, units = "cm")

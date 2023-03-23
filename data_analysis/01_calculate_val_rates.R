@@ -121,8 +121,8 @@ all_circ
 cq = cq %>%
   left_join(all_circ) 
 
-# cq %>%
-#   write_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
+cq %>%
+  write_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
 
 #' # Calculate val rates (precision) per method per tool
 perc_val = cq %>% 
@@ -148,30 +148,11 @@ perc_val = cq %>%
 
 perc_val
 
-#perc_val %>% write_tsv('../data/Supplementary_Table_6A_precision_values.txt')
 
+#' ## Save dataframe (Sup Table 6A)
 
+perc_val %>% write_tsv('../data/Supplementary_Table_6A_precision_values.txt')
 
-#' ## Per tool val rates => stats
-perc_val %>%
-  filter(count_group == 'count ≥ 5') %>%
-  pull(perc_RR_val) %>%
-  quantile()
-
-perc_val %>%
-  filter(count_group == 'count ≥ 5') %>%
-  pull(perc_qPCR_val) %>%
-  quantile()
-
-perc_val %>%
-  filter(count_group == 'count ≥ 5') %>%
-  pull(perc_amp_val) %>%
-  quantile()
-
-perc_val %>%
-  filter(count_group == 'count ≥ 5') %>%
-  pull(perc_compound_val) %>%
-  quantile()
 
 
 #' # Calculate sensitivity
@@ -204,8 +185,9 @@ sens = cq %>%
 sens
 
 
-#' # Save dataframe (Sup Table 6B)
-#sens %>% write_tsv('../data/Supplementary_Table_6B_sensitivity_values.txt')
+#' ## Save dataframe (Sup Table 6B)
+sens %>% write_tsv('../data/Supplementary_Table_6B_sensitivity_values.txt')
+
 
 #' # Make dataframe with all info per tool and ranking
 
@@ -231,23 +213,118 @@ val_sens_df = perc_val %>%
   arrange(desc(count_group), desc(sensitivity)) %>%
   rename(nr_circ_detected = n, qPCR_precision = perc_qPCR_val,
          RR_precision = perc_RR_val, amp_precision = perc_amp_val,
-         compound_precision = perc_compound_val) 
+         compound_precision = perc_compound_val) %>% 
+  mutate(across(c(qPCR_precision, RR_precision, amp_precision,
+                  compound_precision, sensitivity), round, 4))
 
 val_sens_df
 
-# val_sens_df %>%
-#   write_tsv('../data/Supplementary_Table_6_tool_ranking.txt')
+val_sens_df %>%
+  write_tsv('../data/Supplementary_Table_6_tool_ranking.txt')
 
-#' # Overall validation rates (ignoring tools)
-#' ## Calculate overall validation rates
-#' RT-qPCR
+
+#' # RNase R enrichment calculations
+
+#' calculate enrichment
+
+all_circ_treated = read_tsv('../data/Supplementary_Table_4_all_circRNAs_treated.txt')
+
+treatment = all_circ %>%
+  rename(count_UT = BSJ_count) %>% 
+  select(chr, start, end, strand, cell_line, tool, circ_id, circ_id_strand, count_UT, count_group) %>%
+  full_join(all_circ_treated %>% 
+              rename(count_T = BSJ_count) %>%
+              select(chr, start, end, strand, cell_line, tool, circ_id, circ_id_strand, count_T))
+
+treatment
+
+treatment = treatment %>%
+  left_join(read_tsv('../data/details/nr_reads.txt') %>% 
+              select(-RNA_id) %>%
+              pivot_wider(names_from = RNaseR, values_from = nr_reads) %>%
+              rename(nr_reads_T = treated, nr_reads_UT = untreated)) %>%
+  # calculate CPMs and enrichment factor (Sailfish-cir is already TPM)
+  mutate(cpm_T = ifelse(tool == 'Sailfish-cir', count_T, 1000000 * count_T/nr_reads_T), 
+         cpm_UT = ifelse(tool == 'Sailfish-cir', count_UT, 1000000 * count_UT/nr_reads_UT),
+         enrichment = cpm_T/cpm_UT,
+         enrichment_bin = ifelse(enrichment > 1, 'enriched', 'not enriched'),
+         enrichment_bin = ifelse(is.na(count_T), 'count treated NA', enrichment_bin),
+         enrichment_bin = ifelse(is.na(count_UT), 'count untreated NA', enrichment_bin))
+
+treatment %>% write_tsv('../data/Supplementary_Table_5_RNase_R_enrichment_seq.txt')
+
+
+#' # Get all stats
+
+#' ## Per tool val rates => stats
+#' ### RT-qPCR precision
+perc_val %>%
+  filter(count_group == 'count ≥ 5') %>%
+  pull(perc_qPCR_val) %>%
+  quantile()
+
+perc_val %>%
+  filter(count_group == 'count < 5') %>%
+  pull(perc_qPCR_val) %>%
+  quantile()
+
+#' ### RNase R precision
+perc_val %>%
+  filter(count_group == 'count ≥ 5') %>%
+  pull(perc_RR_val) %>%
+  quantile()
+
+perc_val %>%
+  filter(count_group == 'count < 5') %>%
+  pull(perc_RR_val) %>%
+  quantile()
+
+#' ### amplicon sequencing precision
+perc_val %>%
+  filter(count_group == 'count ≥ 5') %>%
+  pull(perc_amp_val) %>%
+  quantile()
+
+perc_val %>%
+  filter(count_group == 'count < 5') %>%
+  pull(perc_amp_val) %>%
+  quantile()
+
+#' ### compound precision
+perc_val %>%
+  filter(count_group == 'count ≥ 5') %>%
+  pull(perc_compound_val) %>%
+  quantile()
+
+perc_val %>%
+  filter(count_group == 'count < 5') %>%
+  pull(perc_compound_val) %>%
+  quantile()
+
+#' ### sensitivity
+
+sens %>%
+  filter(!count_group_median == 'count ≥ 5') %>%
+  filter(!tool == 'circRNA_finder',
+         !tool == 'segemehl') %>%
+  pull(sensitivity) %>%
+  quantile()
+
+sens %>%
+  filter(!count_group_median == 'count < 5') %>%
+  pull(sensitivity) %>%
+  quantile()
+
+
+#' ## Overall validation rates (ignoring tools) - all circ
+#' ### RT-qPCR
 cq %>%
   select(circ_id, cell_line, qPCR_val) %>% unique() %>%
   count(qPCR_val)
 
 round(1479/(1479+37), digits = 3)
 
-#' RNase R
+#' ### RNase R
 cq %>%
   select(circ_id, cell_line, RR_val) %>% unique() %>%
   count(RR_val)
@@ -255,7 +332,7 @@ cq %>%
 round(1319/(1319+85), digits = 3)
 round(112/(1319+85+112), digits = 3)
 
-#' amplicon sequencing
+#' ### amplicon sequencing
 cq %>%
   select(circ_id, cell_line, amp_seq_val) %>% unique() %>%
   count(amp_seq_val)
@@ -263,8 +340,36 @@ cq %>%
 cq %>%
   select(circ_id, cell_line, amp_seq_val_detail) %>% unique() %>%
   count(amp_seq_val_detail)
+
 round(1014/(1014+165), digits = 3)
 round(337/(1014+165+337), digits = 3)
+
+#' ## Overall validation rates (ignoring tools) - low-abundant circ
+#' ### RT-qPCR
+cq %>%
+  filter(count_group == 'count < 5') %>%
+  select(circ_id, cell_line, qPCR_val) %>% unique() %>%
+  count(qPCR_val)
+
+round(243/(243+17), digits = 3)
+
+#' ### RNase R
+cq %>%
+  filter(count_group == 'count < 5') %>%
+  select(circ_id, cell_line, RR_val) %>% unique() %>%
+  count(RR_val)
+
+round(165/(165+25), digits = 3)
+
+#' ### amplicon sequencing
+cq %>%
+  filter(count_group == 'count < 5') %>%
+  select(circ_id, cell_line, amp_seq_val) %>% unique() %>%
+  count(amp_seq_val)
+
+round((63+136)/(63+136+61), digits = 3)
+
+round(136/(63+136), digits = 3)
 
 
 #' ## Calculate perc of circRNAs upsetplot
@@ -329,60 +434,3 @@ round(18/1103, digits = 3)
 round(128/1103, digits = 3)
 
 
-#' ## Calculate  val rate < 5
-#' RT-qPCR
-cq %>%
-  filter(count_group == 'count < 5') %>%
-  select(circ_id, cell_line, qPCR_val) %>% unique() %>%
-  count(qPCR_val)
-
-round(243/(243+17), digits = 3)
-
-#' RNase R
-cq %>%
-  filter(count_group == 'count < 5') %>%
-  select(circ_id, cell_line, RR_val) %>% unique() %>%
-  count(RR_val)
-
-round(165/(165+25), digits = 3)
-
-#' amplicon sequencing
-cq %>%
-  filter(count_group == 'count < 5') %>%
-  select(circ_id, cell_line, amp_seq_val) %>% unique() %>%
-  count(amp_seq_val)
-
-round((63+136)/(63+136+61), digits = 3)
-
-round(136/(63+136), digits = 3)
-
-
-#' # RNase R enrichment calculations
-
-#' calculate enrichment
-
-all_circ_treated = read_tsv('../data/Supplementary_Table_4_all_circRNAs_treated.txt')
-
-treatment = all_circ %>%
-  rename(count_UT = BSJ_count) %>% 
-  select(chr, start, end, strand, cell_line, tool, circ_id, circ_id_strand, count_UT, count_group) %>%
-  full_join(all_circ_treated %>% 
-              rename(count_T = BSJ_count) %>%
-              select(chr, start, end, strand, cell_line, tool, circ_id, circ_id_strand, count_T))
-
-treatment
-
-treatment = treatment %>%
-  left_join(read_tsv('../data/details/nr_reads.txt') %>% 
-              select(-RNA_id) %>%
-              pivot_wider(names_from = RNaseR, values_from = nr_reads) %>%
-              rename(nr_reads_T = treated, nr_reads_UT = untreated)) %>%
-  # calculate CPMs and enrichment factor (Sailfish-cir is already TPM)
-  mutate(cpm_T = ifelse(tool == 'Sailfish-cir', count_T, 1000000 * count_T/nr_reads_T), 
-         cpm_UT = ifelse(tool == 'Sailfish-cir', count_UT, 1000000 * count_UT/nr_reads_UT),
-         enrichment = cpm_T/cpm_UT,
-         enrichment_bin = ifelse(enrichment > 1, 'enriched', 'not enriched'),
-         enrichment_bin = ifelse(is.na(count_T), 'count treated NA', enrichment_bin),
-         enrichment_bin = ifelse(is.na(count_UT), 'count untreated NA', enrichment_bin))
-
-#treatment %>% write_tsv('../data/Supplementary_Table_5_RNase_R_enrichment_seq.txt')

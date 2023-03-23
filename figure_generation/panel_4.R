@@ -92,7 +92,7 @@ val_df %>%
 
 
 
-#' # Figure 4B & Sup Figure 24
+#' # Figure 4B & Sup Figure 33
 simple_union = read_tsv('../data/Supplementary_Table_7_combo_2tools.txt')
 simple_union
 
@@ -151,7 +151,7 @@ union_sub %>%
   ylab('% of all predicted circRNAs')
 
 #ggsave('separate_figures/figure_4B.pdf',  width = 12, height = 10, units = "cm")
-#ggsave('separate_figures/sup_figure_24.pdf',  width = 20, height = 20, units = "cm")
+#ggsave('separate_figures/sup_figure_33.pdf',  width = 20, height = 20, units = "cm")
 
   
 #' check mean increase in perc

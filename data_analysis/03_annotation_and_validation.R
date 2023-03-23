@@ -620,3 +620,7 @@ mosaicplot(cont_table,
 chisq.test(cont_table)$expected
 
 chisq.test(cont_table)
+
+#' OR
+OR = (cont_table[1,2]/cont_table[1,1])/(cont_table[2,2]/cont_table[2,1])
+OR

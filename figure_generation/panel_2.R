@@ -80,7 +80,7 @@ all_circ %>%
 #ggsave('separate_figures/figure_2B.pdf',  width = 10, height = 8.5, units = "cm")
 #ggsave('../supplemental/sup_figures/sup_figure_1.pdf',  width = 20, height = 12, units = "cm")
 
-#' # Figure 2C & Sup Figure 8
+#' # Figure 2C & Sup Figure 4
 nr_detected = all_circ %>% 
   group_by(chr, start, end, circ_id, cell_line) %>%
   summarise(n_detected = n()) %>%
@@ -117,7 +117,7 @@ n_detected_per_tool %>%
   scale_y_continuous(labels = scales::comma_format())
 
 #ggsave('separate_figures/figure_2C.pdf',  width = 10, height = 9, units = "cm")
-#ggsave('../supplemental/sup_figures/sup_figure_8.pdf',  width = 21, height = 12, units = "cm")
+#ggsave('../supplemental/sup_figures/sup_figure_4.pdf',  width = 21, height = 12, units = "cm")
 
 #' # Figure 2D
 
