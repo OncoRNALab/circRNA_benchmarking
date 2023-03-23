@@ -131,6 +131,52 @@ combo
 combo %>% write_tsv('../data/Supplementary_Table_7_combo_2tools.txt')
 
 
+#' ## Generate a top 10 list of combinations (Supplementary Table 9)
+
+#' select only one combination when there are doubles + remove the combinations of twice the same tool
+combo_top = combo %>%
+  filter(!tool_1 == tool_2) %>%
+  group_by(tool_combo, cell_line) %>%
+  slice(1) %>%
+  ungroup() 
+
+#' take all cell lines together and save as separate columns
+combo_top = combo_top %>%
+  select(tool_1, tool_2, nr_union, cell_line) %>%
+  pivot_wider(names_from = cell_line, values_from = nr_union) %>%
+  rename(nr_union_HLF = HLF, nr_union_NCI_H23 = `NCI-H23`, nr_union_SW480 = SW480) %>%
+  left_join(combo_top %>%
+              select(tool_1, tool_2, w_val_rate, cell_line) %>%
+              pivot_wider(names_from = cell_line, values_from = w_val_rate) %>%
+              rename(w_precision_HLF = HLF, w_precision_NCI_H23 = `NCI-H23`, w_precision_SW480 = SW480))
+
+#' generate a rank for each metric
+combo_top = combo_top %>%
+  mutate(w_precision_HLF_rank = dense_rank(desc(w_precision_HLF)),
+         nr_union_HLF_rank = dense_rank(desc(nr_union_HLF)),
+         w_precision_NCI_H23_rank = dense_rank(desc(w_precision_NCI_H23)),
+         nr_union_NCI_H23_rank = dense_rank(desc(nr_union_NCI_H23)),
+         w_precision_SW480_rank = dense_rank(desc(w_precision_SW480)),
+         nr_union_SW480_rank = dense_rank(desc(nr_union_SW480)))
+
+#' select the top 5 in each category
+combo_top = combo_top %>%
+  slice_max(w_precision_HLF, n = 5) %>%
+  bind_rows(combo_top %>% slice_max(nr_union_HLF, n = 5)) %>%
+  bind_rows(combo_top %>% slice_max(w_precision_NCI_H23, n = 5)) %>%
+  bind_rows(combo_top %>% slice_max(nr_union_NCI_H23, n = 5)) %>%
+  bind_rows(combo_top %>% slice_max(w_precision_SW480, n = 5)) %>%
+  bind_rows(combo_top %>% slice_max(nr_union_SW480, n = 5)) %>%
+  unique() %>%
+  select("tool_1", "tool_2", "nr_union_HLF", "nr_union_HLF_rank", "nr_union_NCI_H23", 
+         "nr_union_NCI_H23_rank", "nr_union_SW480", "nr_union_SW480_rank" , "w_precision_HLF", 
+         "w_precision_HLF_rank",  "w_precision_NCI_H23", "w_precision_NCI_H23_rank",
+         "w_precision_SW480", "w_precision_SW480_rank")
+
+#' save as sup table 9
+combo_top %>% write_tsv('../data/Supplementary_Table_9_top_tool_combinations.txt')
+
+
 #' # Three tools
 #' only for circRNAs in BSJ count group ≥ 5
 combo_3 = tibble()
