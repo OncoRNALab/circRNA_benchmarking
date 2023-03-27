@@ -96,21 +96,9 @@ val_df %>%
 simple_union = read_tsv('../data/Supplementary_Table_7_combo_2tools.txt')
 simple_union
 
-#' add total nr of circ for that cell line
-total_cl = all_circ %>%
-  group_by(cell_line) %>%
-  filter(count_group == 'count ≥ 5') %>%
-  select(circ_id, cell_line) %>%
-  unique() %>%
-  count(cell_line) %>%
-  rename(total_cell_line = n) %>% ungroup()
-
-total_cl
-
 union_sub = simple_union %>%
   # filter based on percentage increase
-  left_join(total_cl) %>%
-  filter((nr_union - pmax(total_n_1, total_n_2))/total_cell_line > 0.075) %>%
+  filter((nr_union - pmax(total_n_1, total_n_2))/total_cell_line > 0.075) %>% # 1000 circ
   #filter(nr_union - pmax(total_n_1, total_n_2) > 999) %>%
   filter(perc_compound_val_1 >= 0.9,
          perc_compound_val_2 >= 0.9)
@@ -119,16 +107,15 @@ union_sub = simple_union %>%
 union_sub = union_sub %>%
   bind_rows(simple_union %>%
               filter(tool_1 == tool_2,
-                     tool_1 %in% (union_sub %>% pull(tool_1, tool_2) %>% unique())) %>%
-              left_join(total_cl) )
+                     tool_1 %in% (union_sub %>% pull(tool_1, tool_2) %>% unique())))
 
-#' remove doubles
+#' only keep one point for each combo
+
 union_sub = union_sub %>%
   group_by(tool_combo, cell_line) %>%
   sample_n(1) %>%
   ungroup()
 
-union_sub
 
 #' as percentage of all circ in that cell line
 
@@ -154,7 +141,7 @@ union_sub %>%
 #ggsave('separate_figures/sup_figure_33.pdf',  width = 20, height = 20, units = "cm")
 
   
-#' check mean increase in perc
+#' check mean increase in number of circ (percentage)
 simple_union %>%
   filter(count_group == "count ≥ 5",
          !tool_1 == tool_2,

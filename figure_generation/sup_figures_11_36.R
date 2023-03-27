@@ -781,7 +781,7 @@ count_Cq %>%
 
 
 
-#' # Sup Figure 32: validation of circRNA compared to their precense in databases
+#' # Sup Figure 32: validation of circRNA compared to their presence in databases
 val_db = cq %>% 
   select(circ_id, qPCR_val, RR_val, amp_seq_val, n_db, cell_line) %>% unique() %>%
   pivot_longer(cols = c(qPCR_val, RR_val, amp_seq_val), names_to = "val_type", values_to = "val") %>%
@@ -818,17 +818,6 @@ simple_union_3 = read_tsv('../data/Supplementary_Table_8_combo_3tools.txt')
 
 
 #' ### simple version
-
-#' add total nr of circ for that cell line
-total_cl = all_circ %>%
-  group_by(cell_line) %>%
-  filter(count_group == 'count ≥ 5') %>%
-  select(circ_id, cell_line) %>%
-  unique() %>%
-  count(cell_line) %>%
-  rename(total_cell_line = n) %>% ungroup()
-
-total_cl
 
 #' make subset
 union_sub_3 = simple_union_3 %>%
@@ -943,9 +932,7 @@ simple_union_3 %>%
          perc_compound_val_1 >= 0.9,
          perc_compound_val_2 >= 0.9,
          perc_compound_val_3 >= 0.9) %>%
-  mutate(increase = nr_union - total_n_1,
-         increase_prec = increase/total_n_1) %>%
-  pull(increase_prec) %>%
+  pull(perc_increase_t1) %>%
   quantile()
 
 #' # Sup Figure 35: comparison with precision values from simulated data
