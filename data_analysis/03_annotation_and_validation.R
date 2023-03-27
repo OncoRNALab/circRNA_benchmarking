@@ -416,31 +416,18 @@ median_diff %>% pull(sens_diff) %>% median()
 wilcox.test(sensitivity ~ BSJ_filter, data=sens_anno) 
 
 
-#' ## Correlation estimated sensitivity and theoretical nr of TPs
-
-val_cor = val %>%
-  # use perc_compound_val
-  select(tool, count_group, perc_compound_val) %>%
-  # get the number of detected circRNAs for each cell line and tool, per count group
-  left_join(all_circ %>%
-              group_by(cell_line, tool, count_group) %>%
-              summarise(total_n_ut = n())) %>%
-  # calculate the theoretical nr of validated circ
-  mutate(theo_TP_all = perc_compound_val * total_n_ut) %>%
-  left_join(sens, by = c('count_group' = 'count_group_median', 'tool')) %>%
-  group_by(tool, count_group, perc_compound_val, sensitivity) %>%
-  summarize(theo_TP_all_cl = sum(theo_TP_all)) %>% ungroup()
-
-val_cor
+#' ## Correlation sensitivity and theoretical nr of TPs (extrapolated sensitivity)
 
 
 #' below 5
-val_cor_tmp = val_cor %>% filter(count_group == "count < 5")
-cor.test(val_cor_tmp$sensitivity, val_cor_tmp$theo_TP_all_cl, method = 'spearman')
+sens_tmp = sens %>% filter(count_group_median == "count < 5",
+                           !tool == "Sailfish-cir")
+cor.test(sens_tmp$sensitivity, sens_tmp$extrapolated_sensitivity, method = 'spearman')
 
 #' above 5
-val_cor_tmp = val_cor %>% filter(count_group == "count ≥ 5")
-cor.test(val_cor_tmp$sensitivity, val_cor_tmp$theo_TP_all_cl, method = 'spearman')
+sens_tmp = sens %>% filter(count_group_median == "count ≥ 5",
+                           !tool == "Sailfish-cir")
+cor.test(sens_tmp$sensitivity, sens_tmp$extrapolated_sensitivity, method = 'spearman')
 
 
 

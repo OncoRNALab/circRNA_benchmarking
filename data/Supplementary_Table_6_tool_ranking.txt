@@ -1,31 +1,31 @@
-tool	count_group	nr_circ_detected	nr_circ_rank	qPCR_precision	qPCR_precision_rank	RR_precision	RR_precision_rank	amp_precision	amp_precision_rank	compound_precision	compound_precision_rank	sensitivity	sensitivity_rank
-Sailfish-cir	no_counts	45198	1	0.97	1	0.9457	1	0.8308	1	0.7846	1	0.8194	1
-Sailfish-cir	no_counts	45198	1	0.97	1	0.9457	1	0.8308	1	0.7846	1	0.6209	2
-circtools	count ≥ 5	14304	4	1	1	0.9875	2	0.9683	4	0.9524	5	0.871	1
-CIRI2	count ≥ 5	19960	1	0.975	3	0.973	6	0.9655	5	0.9138	10	0.8684	2
-CircSplice	count ≥ 5	10532	6	0.9875	2	0.9221	12	0.9265	10	0.8824	13	0.8645	3
-CIRIquant	count ≥ 5	13861	5	0.975	3	0.962	8	1	1	0.9831	1	0.8619	4
-CirComPara2	count ≥ 5	15693	2	0.9875	2	0.9625	7	1	1	0.9815	2	0.8606	5
-find_circ	count ≥ 5	9584	8	0.9875	2	0.9744	4	0.9552	6	0.9403	6	0.8039	6
-CIRCexplorer3	count ≥ 5	15201	3	1	1	0.9615	9	0.9853	2	0.9265	9	0.7884	7
-circRNA_finder	count ≥ 5	9748	7	0.9875	2	0.9367	10	1	1	0.9531	4	0.7135	8
-ecircscreen	count ≥ 5	6187	10	1	1	0.962	8	0.9833	3	0.9667	3	0.6426	9
-PFv2	count ≥ 5	2838	14	0.9	4	0.7403	13	0.3	13	0.2714	15	0.6426	9
-KNIFE	count ≥ 5	6187	10	0.9875	2	0.974	5	0.9516	7	0.9032	12	0.4839	10
-NCLscan	count ≥ 5	5730	11	1	1	1	1	0.9483	8	0.931	8	0.4761	11
-NCLcomparator	count ≥ 5	5596	12	0.9875	2	0.9873	3	0.9394	9	0.9394	7	0.4671	12
-circseq_cup	count ≥ 5	8420	9	1	1	0.9296	11	0.8378	12	0.7297	14	0.36	13
-segemehl	count ≥ 5	2859	13	1	1	0.9873	3	0.9062	11	0.9062	11	0.2968	14
-CIRI2	count < 5	130960	2	0.9	3	0.75	10	0.7692	5	0.5385	10	0.8736	1
-CIRIquant	count < 5	106963	3	0.9	3	0.8	8	0.5333	10	0.2667	12	0.7582	2
-find_circ	count < 5	103025	5	0.95	2	0.9231	4	0.35	11	0.3	11	0.7582	2
-CircSplice	count < 5	105378	4	1	1	0.9286	3	0.6429	8	0.5714	8	0.7418	3
-CIRCexplorer3	count < 5	56399	7	0.9	3	0.8571	6	0.7333	6	0.6667	6	0.7198	4
-circtools	count < 5	48027	8	1	1	1	1	0.9412	1	0.8824	1	0.7033	5
-CirComPara2	count < 5	59675	6	0.9	3	0.7692	9	0.7273	7	0.6364	7	0.6923	6
-ecircscreen	count < 5	34645	12	1	1	0.9412	2	0.8667	3	0.8	2	0.544	7
-NCLcomparator	count < 5	36586	11	1	1	1	1	0.8571	4	0.7143	5	0.3736	8
-NCLscan	count < 5	37013	10	0.95	2	0.8667	5	0.9231	2	0.7692	3	0.3736	8
-PFv2	count < 5	38899	9	0.85	4	0.8235	7	0.6111	9	0.5556	9	0.3242	9
-KNIFE	count < 5	16101	13	1	1	1	1	0.9412	1	0.7647	4	0.2253	10
-circseq_cup	count < 5	171530	1	0.8	5	0.5	11	0.1765	12	0.0588	13	0.1868	11
+tool	count_group	nr_circ_detected	nr_circ_rank	qPCR_precision	qPCR_precision_rank	RR_precision	RR_precision_rank	amp_precision	amp_precision_rank	compound_precision	compound_precision_rank	sensitivity	sensitivity_rank	extrapolated_sensitivity	extrapolated_sensitivity_rank
+Sailfish-cir	no_counts	45198	1	0.97	1	0.9457	1	0.8308	1	0.7846	1	0.6209	2	35463	1
+Sailfish-cir	no_counts	45198	1	0.97	1	0.9457	1	0.8308	1	0.7846	1	0.8194	1	35463	1
+CIRCexplorer3	count ≥ 5	15201	3	1	1	0.9615	9	0.9853	2	0.9265	9	0.7884	7	14083	3
+CirComPara2	count ≥ 5	15693	2	0.9875	2	0.9625	7	1	1	0.9815	2	0.8606	5	15402	2
+circRNA_finder	count ≥ 5	9748	7	0.9875	2	0.9367	10	1	1	0.9531	4	0.7135	8	9291	7
+circseq_cup	count ≥ 5	8420	9	1	1	0.9296	11	0.8378	12	0.7297	14	0.36	13	6144	9
+CircSplice	count ≥ 5	10532	6	0.9875	2	0.9221	12	0.9265	10	0.8824	13	0.8645	3	9293	6
+circtools	count ≥ 5	14304	4	1	1	0.9875	2	0.9683	4	0.9524	5	0.871	1	13623	5
+CIRI2	count ≥ 5	19960	1	0.975	3	0.973	6	0.9655	5	0.9138	10	0.8684	2	18239	1
+CIRIquant	count ≥ 5	13861	5	0.975	3	0.962	8	1	1	0.9831	1	0.8619	4	13626	4
+ecircscreen	count ≥ 5	6187	10	1	1	0.962	8	0.9833	3	0.9667	3	0.6426	9	5981	10
+find_circ	count ≥ 5	9584	8	0.9875	2	0.9744	4	0.9552	6	0.9403	6	0.8039	6	9012	8
+KNIFE	count ≥ 5	6187	10	0.9875	2	0.974	5	0.9516	7	0.9032	12	0.4839	10	5588	11
+NCLcomparator	count ≥ 5	5596	12	0.9875	2	0.9873	3	0.9394	9	0.9394	7	0.4671	12	5257	13
+NCLscan	count ≥ 5	5730	11	1	1	1	1	0.9483	8	0.931	8	0.4761	11	5335	12
+PFv2	count ≥ 5	2838	14	0.9	4	0.7403	13	0.3	13	0.2714	15	0.6426	9	770	15
+segemehl	count ≥ 5	2859	13	1	1	0.9873	3	0.9062	11	0.9062	11	0.2968	14	2591	14
+CIRCexplorer3	count < 5	56399	7	0.9	3	0.8571	6	0.7333	6	0.6667	6	0.7198	4	37599	5
+CirComPara2	count < 5	59675	6	0.9	3	0.7692	9	0.7273	7	0.6364	7	0.6923	6	37975	4
+circseq_cup	count < 5	171530	1	0.8	5	0.5	11	0.1765	12	0.0588	13	0.1868	11	10090	13
+CircSplice	count < 5	105378	4	1	1	0.9286	3	0.6429	8	0.5714	8	0.7418	3	60216	2
+circtools	count < 5	48027	8	1	1	1	1	0.9412	1	0.8824	1	0.7033	5	42377	3
+CIRI2	count < 5	130960	2	0.9	3	0.75	10	0.7692	5	0.5385	10	0.8736	1	70517	1
+CIRIquant	count < 5	106963	3	0.9	3	0.8	8	0.5333	10	0.2667	12	0.7582	2	28523	7
+ecircscreen	count < 5	34645	12	1	1	0.9412	2	0.8667	3	0.8	2	0.544	7	27716	9
+find_circ	count < 5	103025	5	0.95	2	0.9231	4	0.35	11	0.3	11	0.7582	2	30908	6
+KNIFE	count < 5	16101	13	1	1	1	1	0.9412	1	0.7647	4	0.2253	10	12313	12
+NCLcomparator	count < 5	36586	11	1	1	1	1	0.8571	4	0.7143	5	0.3736	8	26133	10
+NCLscan	count < 5	37013	10	0.95	2	0.8667	5	0.9231	2	0.7692	3	0.3736	8	28472	8
+PFv2	count < 5	38899	9	0.85	4	0.8235	7	0.6111	9	0.5556	9	0.3242	9	21611	11

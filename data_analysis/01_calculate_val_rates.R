@@ -156,6 +156,7 @@ perc_val %>% write_tsv('../data/Supplementary_Table_6A_precision_values.txt')
 
 
 #' # Calculate sensitivity
+#' ## Based on validated set (n = 657)
 
 #' first calculate the total nr of validated circ per count group
 
@@ -185,6 +186,32 @@ sens = cq %>%
 sens
 
 
+#' ## Based on theoretical nr of TPs => extrapolated sensitivity
+sens_2 = perc_val %>% 
+  # use perc_compound_val
+  select(tool, count_group, perc_compound_val) %>%
+  # get the number of detected circRNAs for each cell line and tool, per count group
+  left_join(all_circ %>%
+              group_by(tool, count_group) %>%
+              summarise(total_n = n())) %>%
+  # calculate the theoretical nr of validated circ
+  mutate(extrapolated_sensitivity = perc_compound_val * total_n) 
+
+sens_2
+
+#' take both types of sensitivity together and fix Sailfish-circ count group thing
+sens = sens %>% 
+  filter(!tool == 'Sailfish-cir') %>% 
+  full_join(sens_2 %>% filter(!tool == 'Sailfish-cir'),
+            by = c('count_group_median' = 'count_group', 'tool')) %>%
+  bind_rows(sens %>% 
+              filter(tool == 'Sailfish-cir') %>%
+              full_join(sens_2 %>% filter(tool == 'Sailfish-cir') %>%
+                        select(-count_group),
+                        by = c('tool')))
+
+sens
+
 #' ## Save dataframe (Sup Table 6B)
 sens %>% write_tsv('../data/Supplementary_Table_6B_sensitivity_values.txt')
 
@@ -194,28 +221,31 @@ sens %>% write_tsv('../data/Supplementary_Table_6B_sensitivity_values.txt')
 val_sens_df = perc_val %>%
   select(tool, count_group, perc_qPCR_val, perc_RR_val, perc_amp_val, perc_compound_val) %>%
   full_join(sens %>% rename(count_group = count_group_median) %>%
-              select(-nr_detected, -nr_expected) %>%
+              select(-nr_detected, -nr_expected, -total_n) %>%
               mutate(count_group = ifelse(tool == "Sailfish-cir", 'no_counts', count_group))) %>%
   full_join(all_circ %>%
               group_by(tool, count_group) %>% count()) %>%
   group_by(count_group) %>%
-  mutate(qPCR_precision_rank = dense_rank(desc(perc_qPCR_val))) %>%
-  mutate(RR_precision_rank = dense_rank(desc(perc_RR_val))) %>%
-  mutate(amp_precision_rank = dense_rank(desc(perc_amp_val))) %>%
-  mutate(compound_precision_rank = dense_rank(desc(perc_compound_val))) %>%
-  mutate(sensitivity_rank = dense_rank(desc(sensitivity))) %>%
-  mutate(nr_circ_rank = dense_rank(desc(n))) %>% 
+  mutate(qPCR_precision_rank = dense_rank(desc(perc_qPCR_val)),
+         RR_precision_rank = dense_rank(desc(perc_RR_val)),
+         amp_precision_rank = dense_rank(desc(perc_amp_val)),
+         compound_precision_rank = dense_rank(desc(perc_compound_val)),
+         sensitivity_rank = dense_rank(desc(sensitivity)),
+         nr_circ_rank = dense_rank(desc(n)),
+         extrapolated_sensitivity_rank = dense_rank(desc(extrapolated_sensitivity))) %>%
   ungroup() %>%
   filter(!is.na(n)) %>% 
   select(tool, count_group, n,	nr_circ_rank, perc_qPCR_val, qPCR_precision_rank,
          perc_RR_val, RR_precision_rank, perc_amp_val, amp_precision_rank,
-         perc_compound_val, compound_precision_rank, sensitivity, sensitivity_rank) %>%
-  arrange(desc(count_group), desc(sensitivity)) %>%
+         perc_compound_val, compound_precision_rank, sensitivity, sensitivity_rank,
+         extrapolated_sensitivity, extrapolated_sensitivity_rank) %>%
+  arrange(desc(count_group), tool) %>%
   rename(nr_circ_detected = n, qPCR_precision = perc_qPCR_val,
          RR_precision = perc_RR_val, amp_precision = perc_amp_val,
          compound_precision = perc_compound_val) %>% 
   mutate(across(c(qPCR_precision, RR_precision, amp_precision,
-                  compound_precision, sensitivity), round, 4))
+                  compound_precision, sensitivity), round, 4),
+         extrapolated_sensitivity = round(extrapolated_sensitivity, 0))
 
 val_sens_df
 
