@@ -81,16 +81,15 @@ all_circ
 #'# Sup Figure 2: circRNA BSJ count distribution per tool
 
 all_circ %>% 
-  mutate(tool_group = ifelse(tool == "Sailfish-cir", 'sfc', 'other')) %>%
+  filter(!tool == "Sailfish-cir") %>%
   ggplot(aes(tool, BSJ_count)) +
   geom_boxplot() +
   scale_y_log10(labels = scales::comma_format()) +
   ylab("BSJ count") +
   xlab('') +
-  facet_wrap(~tool_group, scales = 'free') +
   mytheme_discrete_x
 
-#ggsave('sup_figures/sup_figure_2.pdf',  width = 20, height = 12, units = "cm")
+#ggsave('separate_figures/sup_figure_2.pdf',  width = 20, height = 12, units = "cm")
 
 
 #' # Sup Figure 3: correlation between BSJ counts from one circRNA detected by different tools
@@ -167,7 +166,7 @@ count_conc_lm %>%
   geom_vline(xintercept = 1, color = '#999999', linetype = 'dashed') +
   coord_fixed(ratio = 1)
 
-#ggsave('sup_figures/sup_figure_3.pdf', width = 10, height = 15, units = "cm")
+#ggsave('separate_figures/sup_figure_3.pdf', width = 10, height = 15, units = "cm")
 
 # get median value
 count_conc_lm %>% pull(slope) %>% quantile()
@@ -183,7 +182,7 @@ count_conc_lm %>% pull(R_squared) %>% quantile()
 #' calculate Jaccard index 
 
 jac = read_tsv("../data/Supplementary_Table_7_combo_2tools.txt") %>%
-  filter(cell_line == 'HLF') %>%
+  filter(cell_line == 'SW480') %>%
   mutate(jac_index = nr_intersection/nr_union,
          jac_dist = 1 - jac_index) # calculate jac index and distance
 
@@ -201,11 +200,11 @@ count_matrix = as.matrix(count_table)
 rownames(count_matrix) = rn
  
 
-# pdf("../supplemental/sup_figures/sup_figure_5.pdf", height=8, width=12)
+#pdf("separate_figures/sup_figure_5_SW480.pdf", height=8, width=12)
 heatmap.2(count_matrix,
-          main = "HLF - bin - Jaccard",
+          main = "SW480 - bin - Jaccard",
           trace = "none", density.info = "none")
-# dev.off()
+#dev.off()
 
 
 #' # Sup Figure 6: number of databases that also report that circRNA
