@@ -91,6 +91,11 @@ all_circ %>%
 
 #ggsave('separate_figures/sup_figure_2.pdf',  width = 20, height = 12, units = "cm")
 
+#' numbers
+
+all_circ %>% 
+  count(tool)
+
 
 #' # Sup Figure 3: correlation between BSJ counts from one circRNA detected by different tools
 
@@ -111,14 +116,15 @@ for (tool_1 in val %>% pull(tool) %>% unique()){
 count_conc
 
 
-# only keep unique combo's (every combo is calculated twice)
+# only keep unique combo's (every combo is calculated twice) => remove this step!
 count_conc = count_conc %>%
-  mutate(tool_comb = paste(tool_1, tool_2, sep = "/"),
-         tool_comb = map_chr(str_split(tool_comb, "/"), ~str_c(str_sort(unique(.x)), collapse = "/"))) %>%
-  group_by(tool_comb, circ_id, cell_line) %>% 
-  arrange(tool_1) %>%
-  filter(row_number()==1) %>%
-  ungroup()
+  mutate(tool_comb = paste(tool_1, tool_2, sep = "/")) #,
+  #       tool_comb = map_chr(str_split(tool_comb, "/"), 
+  #                           ~str_c(str_sort(unique(.x)), collapse = "/"))) #%>%
+  # group_by(tool_comb, circ_id, cell_line) %>% 
+  # arrange(tool_1) %>%
+  # filter(row_number()==1) %>%
+  # ungroup()
 
 count_conc %>%
   filter(!tool_1 == tool_2) %>%
@@ -138,7 +144,7 @@ count_conc %>%
   #coord_fixed(ratio = 1) +
   xlim(0,4000) + ylim(0,4000) +
   #xlim(0,130000) + ylim(0,130000) +
-  facet_wrap(~tool_comb, nrow = 7) +
+  facet_wrap(~tool_comb, nrow = 4) +
   xlab('') +
   ylab('')
 
@@ -159,6 +165,7 @@ count_conc_lm = count_conc %>%
 count_conc_lm
 
 count_conc_lm %>%
+  #mutate(delta_slope = abs(1-slope)) %>%
   ggplot(aes(R_squared, slope)) +
   geom_point() +
   mytheme +
@@ -171,6 +178,9 @@ count_conc_lm %>%
 # get median value
 count_conc_lm %>% pull(slope) %>% quantile()
 count_conc_lm %>% pull(R_squared) %>% quantile()
+count_conc_lm %>% mutate(delta_slope = abs(1-slope)) %>%
+  pull(delta_slope) %>% quantile()
+  
 
 #' # Sup Figure 4: number of tools by which the circRNA is detected
 #' see panel 2 script
@@ -299,6 +309,20 @@ all_circ %>%
 
 
 #ggsave('sup_figures/sup_figure_8.pdf', width = 20, height = 10, units = "cm")
+
+#' numbers
+
+all_circ %>% 
+  mutate(estim_len_ex = end - start,
+         len_type = 'including all exons and introns') %>%
+  bind_rows(all_circ %>% 
+              filter(!estim_len_ex == 'ambiguous',
+                     !is.na(estim_len_ex)) %>%
+              mutate(estim_len_ex = as.numeric(estim_len_ex),
+                     len_type = 'including all exons')) %>% 
+  #filter(len_type == 'including all exons and introns') %>%
+  filter(len_type == 'including all exons') %>%
+  count(tool)
 
 #' # Sup Figure 9: number of exons per circRNA per tool
 all_circ_exons = all_circ %>%

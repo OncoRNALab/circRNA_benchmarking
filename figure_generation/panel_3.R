@@ -83,6 +83,10 @@ val_longer$tool = factor(val_longer$tool, levels = c("circseq_cup", "CIRI2", "CI
 val_longer$val_type = factor(val_longer$val_type, levels = c('perc_qPCR_val', 'perc_RR_val', 'perc_amp_val'))
 
 val_longer %>%
+  filter(count_group == 'count < 5', val_type == "perc_amp_val") %>%
+  pull(nr_in_group) %>% quantile()
+
+val_longer %>%
   ggplot(aes(tool, perc, fill = count_group)) +
   geom_bar(stat = 'identity') +
   geom_errorbar(aes(ymin=CI_low, ymax=CI_up), 
@@ -111,6 +115,11 @@ upset['RR_fail'] = cq %>% filter(RR_val == "fail") %>% mutate(id_cl = paste(circ
 upset['amp_seq_fail'] = cq %>% filter(amp_seq_val == "fail") %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% pull(id_cl) %>% unique() %>% list()
 upset['RR_out_of_range'] = cq %>% filter(is.na(RR_val)) %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% pull(id_cl) %>% unique() %>% list()
 upset['amp_seq_not_included'] = cq %>% filter(is.na(amp_seq_val)) %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% pull(id_cl) %>% unique() %>% list()
+
+# get number y-axis to add to plot
+cq %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% select(id_cl, qPCR_val) %>% unique() %>% count(qPCR_val)
+cq %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% select(id_cl, RR_val_) %>% unique() %>% count(RR_val)
+cq %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% select(id_cl, amp_seq_val) %>% unique() %>% count(amp_seq_val)
 
 
 # pdf(file="separate_figures/figure_3B_upset_small.pdf", onefile=FALSE,

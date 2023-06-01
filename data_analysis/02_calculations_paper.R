@@ -49,7 +49,26 @@ all_circ %>%
 all_circ %>% select(circ_id_strand, ENST) %>% unique() %>%
   filter(is.na(ENST) | ENST == 'ambiguous') %>%
   count(ENST)
-  
+
+# total nr
+
+ensembl = read_tsv('/Users/mivromma/Documents/PhD/indexes/Homo_sapiens.GRCh38.103.gtf',
+                   col_names = c('chr', 'havana', 'type', 'start', 'end', 'dot', 'strand', 'dot2', 'info'))
+
+ensembl %>% filter(type == "transcript") %>%
+  separate(info, into = c('gene_id', 'gene_version', 'transcrip_id', 'rest'), 
+           extra = 'merge', sep = ';') %>%
+  select(transcrip_id) %>% unique()
+
+17461/234393
+
+can = read_tsv('known_exons_GRCh38.103_canonical.bed', col_names = c('chr', 'start', 'end', 'exon', 'dot', 'strand'))
+
+can %>% separate(exon, into = c('ENST', 'ENST_nr', 'exon', 'exon_nr'), sep = '_') %>%
+  select(ENST) %>% unique() %>%
+  inner_join(all_circ %>% select(ENST) %>% unique())
+
+17461/60427
 
 #' # CircRNA length stats
 #' ### All circRNAs
