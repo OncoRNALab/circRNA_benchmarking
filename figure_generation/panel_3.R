@@ -102,7 +102,7 @@ val_longer %>%
   ylab('')
 
 #ggsave('separate_figures/figure_3A.pdf',  width = 21, height = 13, units = "cm")
-
+# val_longer %>% write_tsv('source_data_fig_3A.txt')
 
 #' # Figure 3B
 #' upset
@@ -131,6 +131,10 @@ upset(fromList(upset),
       keep.order = TRUE,
       number.angles = 30,
       point.size = 2.5, line.size = 1)
+
+# cq %>% select(qPCR_val, RR_val, amp_seq_val) %>% 
+#   write_tsv('source_data_fig_3B.txt')
+
 # dev.off()
 
 #' # Figure 3C & Sup Figure 25
@@ -167,3 +171,6 @@ val_cl %>%
 
 #ggsave('separate_figures/sup_figure_25.pdf',  width = 21, height = 24.5, units = "cm")
 #ggsave('separate_figures/figure_3C_alt2.pdf',  width = 21, height = 8, units = "cm")
+
+# val_cl %>% write_tsv('source_data_fig_3C.txt')
+

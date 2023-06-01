@@ -89,7 +89,7 @@ val_df %>%
 
 
 #ggsave('separate_figures/figure_4A.pdf',  width = 21, height = 8.5, units = "cm")
-
+#val_df %>% write_tsv('source_data_fig_4A.txt')
 
 
 #' # Figure 4B & Sup Figure 33
@@ -140,6 +140,12 @@ union_sub %>%
 #ggsave('separate_figures/figure_4B.pdf',  width = 12, height = 10, units = "cm")
 #ggsave('separate_figures/sup_figure_33.pdf',  width = 20, height = 20, units = "cm")
 
+# union_sub %>% 
+#   left_join(all_circ %>% select(circ_id, cell_line, count_group) %>%
+#               filter(count_group == "count ≥ 5") %>%
+#               unique() %>% count(cell_line) %>% rename(total_n = n)) %>%
+#   mutate(perc_union = nr_union/total_n) %>% 
+#   write_tsv('source_data_fig_4B.txt')
   
 #' check mean increase in number of circ (percentage)
 simple_union %>%
@@ -150,4 +156,4 @@ simple_union %>%
   mutate(increase = nr_union - total_n_1,
          increase_prec = increase/total_n_1) %>% #view()
   pull(increase_prec) %>%
-  quantile()
+  quantile() 

@@ -80,6 +80,13 @@ all_circ %>%
 #ggsave('separate_figures/figure_2B.pdf',  width = 10, height = 8.5, units = "cm")
 #ggsave('../supplemental/sup_figures/sup_figure_1.pdf',  width = 20, height = 12, units = "cm")
 
+# all_circ %>% 
+#   group_by(tool, cell_line, count_group) %>% 
+#   summarise(n = n()) %>%
+#   group_by(tool, cell_line) %>% mutate(total_n = sum(n)) %>%
+#   write_tsv('source_data_fig_2B.txt')
+
+
 #' # Figure 2C & Sup Figure 4
 nr_detected = all_circ %>% 
   group_by(chr, start, end, circ_id, cell_line) %>%
@@ -119,6 +126,11 @@ n_detected_per_tool %>%
 #ggsave('separate_figures/figure_2C.pdf',  width = 10, height = 9, units = "cm")
 #ggsave('../supplemental/sup_figures/sup_figure_4.pdf',  width = 21, height = 12, units = "cm")
 
+# n_detected_per_tool %>% 
+#   group_by(tool, cell_line, n_detected_group) %>%
+#   tally() %>% ungroup() %>%
+#   write_tsv('source_data_fig_2C.txt')
+
 #' # Figure 2D
 
 circ_ss_list = list()
@@ -146,5 +158,7 @@ ggplot() +
         title = element_text(size=10, colour='gray30'))
 
 #ggsave('separate_figures/figure_2D.pdf',  width = 20, height = 4.5, units = "cm")
+
+# circ_ss_list %>% write_tsv('source_data_fig_2D.txt')
 
 
