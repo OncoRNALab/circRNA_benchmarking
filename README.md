@@ -1,6 +1,6 @@
 # circRNA_benchmarking
 
-This repository contains all data and scripts used to generate the numbers and figures for the circRNA detection tool benchmarking paper (currently on [BioRxiv](https://www.biorxiv.org/content/10.1101/2022.12.06.519083v1)).
+This repository contains all data and scripts used to generate the numbers and figures for the circRNA detection tool benchmarking [paper](https://www.nature.com/articles/s41592-023-01944-6) published in Nature Methods.
 
 The `data` folder contains
 - the `Supplementary_Table_2_all_circRNAs.txt.gz` file, which contains all predicted circRNAs in the untreated sample in this study with their annotation.
@@ -26,6 +26,4 @@ The `figure_generating` folder contains the R scripts and R markdowns to generat
 
 
 ## citation
-Large-scale benchmarking of circRNA detection tools reveals large differences in sensitivity but not in precision
-Marieke Vromman, Jasper Anckaert, Stefania Bortoluzzi, Alessia Buratin, Chia-Ying Chen, Qinjie Chu, Trees-Juen Chuang, Roozbeh Dehghannasiri, Christoph Dieterich, Xin Dong, Paul Flicek, Enrico Gaffo, Wanjun Gu, Chunjiang He, Steve Hoffmann, Osagie Izuogu, Michael S. Jackson, Tobias Jakobi, Eric C. Lai, Justine Nuytens, Julia Salzman, Mauro Santibanez-Koref, Peter Stadler, Olivier Thas, Eveline Vanden Eynde, Kimberly Verniers, Guoxia Wen, Jakub Westholm, Li Yang, Chu-Yu Ye, Nurten Yigit, Guo-Hua Yuan, Jinyang Zhang, Fangqing Zhao, Jo Vandesompele, Pieter-Jan Volders
-bioRxiv 2022.12.06.519083; doi: https://doi.org/10.1101/2022.12.06.519083
+Vromman, M., Anckaert, J., Bortoluzzi, S. et al. Large-scale benchmarking of circRNA detection tools reveals large differences in sensitivity but not in precision. Nat Methods 20, 1159–1169 (2023). https://doi.org/10.1038/s41592-023-01944-6
