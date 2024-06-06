@@ -88,15 +88,8 @@ all_circ %>%
 
 
 #' # Figure 2C & Sup Figure 4
-nr_detected = all_circ %>% 
-  group_by(chr, start, end, circ_id, cell_line) %>%
-  summarise(n_detected = n()) %>%
-  ungroup()
-
-nr_detected
 
 n_detected_per_tool = all_circ %>% 
-  left_join(nr_detected) %>%
   mutate(n_detected_group = NA,
          n_detected_group = ifelse(n_detected == 1, 'unique', n_detected_group),
          n_detected_group = ifelse(n_detected > 1, '2 tools', n_detected_group),
