@@ -50,23 +50,25 @@ all_circ %>% select(circ_id_strand, ENST) %>% unique() %>%
   filter(is.na(ENST) | ENST == 'ambiguous') %>%
   count(ENST)
 
+39326/(39326+144417)
+
 # total nr
 
-ensembl = read_tsv('/Users/mivromma/Documents/PhD/indexes/Homo_sapiens.GRCh38.103.gtf',
-                   col_names = c('chr', 'havana', 'type', 'start', 'end', 'dot', 'strand', 'dot2', 'info'))
-
-ensembl %>% filter(type == "transcript") %>%
-  separate(info, into = c('gene_id', 'gene_version', 'transcrip_id', 'rest'), 
-           extra = 'merge', sep = ';') %>%
-  select(transcrip_id) %>% unique()
+# ensembl = read_tsv('/Users/mivromma/Documents/PhD/indexes/Homo_sapiens.GRCh38.103.gtf',
+#                    col_names = c('chr', 'havana', 'type', 'start', 'end', 'dot', 'strand', 'dot2', 'info'))
+# 
+# ensembl %>% filter(type == "transcript") %>%
+#   separate(info, into = c('gene_id', 'gene_version', 'transcrip_id', 'rest'), 
+#            extra = 'merge', sep = ';') %>%
+#   select(transcrip_id) %>% unique()
 
 17461/234393
 
-can = read_tsv('known_exons_GRCh38.103_canonical.bed', col_names = c('chr', 'start', 'end', 'exon', 'dot', 'strand'))
-
-can %>% separate(exon, into = c('ENST', 'ENST_nr', 'exon', 'exon_nr'), sep = '_') %>%
-  select(ENST) %>% unique() %>%
-  inner_join(all_circ %>% select(ENST) %>% unique())
+# can = read_tsv('known_exons_GRCh38.103_canonical.bed', col_names = c('chr', 'start', 'end', 'exon', 'dot', 'strand'))
+# 
+# can %>% separate(exon, into = c('ENST', 'ENST_nr', 'exon', 'exon_nr'), sep = '_') %>%
+#   select(ENST) %>% unique() %>%
+#   inner_join(all_circ %>% select(ENST) %>% unique())
 
 17461/60427
 
@@ -126,7 +128,7 @@ all_circ %>%
   select(chr, start, end, strand) %>% unique() %>%
   nrow()
 
-round((190314-174009)/174009, 3)
+round((172744-156433)/156433, 3)
 
 
 #' # CircRNA numbers
@@ -140,7 +142,22 @@ all_circ %>%
 
 #' nr of unique circ
 all_circ %>% select(circ_id) %>%
-  unique()
+  unique() %>% nrow()
 
 #' total nr of circ
 nrow(all_circ)
+
+#' nr of unique circ
+
+all_circ %>%
+  select(circ_id_strand, n_detected) %>%
+  unique() %>%
+  mutate(uni = ifelse(n_detected == 1, 'yes', 'no')) %>%
+  count(uni)
+
+181204 / (181204 + 262050)
+
+#' splice sites
+
+all_circ %>% filter(tool == "NCLcomparator") %>% count(ss_motif) %>% arrange(desc(n))
+all_circ %>% filter(!ss_motif == 'AGNGT') %>% pull(tool) %>% unique()

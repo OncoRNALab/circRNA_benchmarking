@@ -1,6 +1,6 @@
 
 #' ---
-#' title: "Generation of figures pannel 2"
+#' title: "Generation of figures panel 2"
 #' author: "Marieke Vromman"
 #' output: 
 #'    html_document:
@@ -35,11 +35,11 @@ library(ggseqlogo)
 mytheme = theme_bw(base_size = 10) + 
   theme(text = element_text(size=10, colour='black'),
         title = element_text(size=10, colour='black'),
-        line = element_line(size=0.5),
+        line = element_line(linewidth=0.5),
         axis.title = element_text(size=10, colour='black'),
         axis.text = element_text(size=10, colour='black'),
         axis.line = element_line(colour = "black"),
-        axis.ticks = element_line(size=0.5),
+        axis.ticks = element_line(linewidth =0.5),
         strip.background = element_blank(),
         strip.text.y = element_blank(),
         panel.grid = element_blank(),
@@ -105,7 +105,7 @@ n_detected_per_tool$tool = factor(n_detected_per_tool$tool, levels = c("circseq_
 
 
 n_detected_per_tool %>%
-  #filter(cell_line == "HLF") %>%
+  filter(cell_line == "HLF") %>%
   ggplot(aes(tool, fill = n_detected_group)) +
   geom_bar() +
   mytheme_discrete_x +

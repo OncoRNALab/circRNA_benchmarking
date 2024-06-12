@@ -188,7 +188,7 @@ combo_top
 
 #' add tool annotation
 
-tool_annotation = read_tsv('/Users/mivromma/Documents/PhD/GitHub/circRNA_benchmarking/data/details/tool_annotation.txt')
+tool_annotation = read_tsv('../data/details/tool_annotation.txt')
 tool_annotation
 
 combo_top = combo_top %>%

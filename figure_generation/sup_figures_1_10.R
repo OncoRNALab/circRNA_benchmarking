@@ -248,7 +248,7 @@ all_circ_db %>%
   select(circ_id, n_db) %>% unique() %>%
   filter(is.na(n_db))
 
-round(215885/315312, digits = 3)
+round(198035/297717, digits = 3)
 
 all_circ_db %>%
   group_by(tool) %>%
@@ -284,9 +284,9 @@ all_circ_enst %>%
   select(chr, start, end, strand, ENST_group) %>% unique() %>%
   count(ENST_group)
 
-round(100 * 216483 / (216483 + 41683 + 144782), 1)
-round(100 * 41683 / (216483 + 41683 + 144782), 1)
-round(100 * 144782 / (216483 + 41683 + 144782), 1)
+round(100 * 201635 / (201635 + 39326 + 144417), 1)
+round(100 * 39326 / (201635 + 39326 + 144417), 1)
+round(100 * 144417 / (201635 + 39326 + 144417), 1)
 
 #' # Sup Figure 8: distribution of estimated circRNA length
 all_circ %>% 

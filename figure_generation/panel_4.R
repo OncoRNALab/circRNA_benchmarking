@@ -98,7 +98,7 @@ simple_union
 
 union_sub = simple_union %>%
   # filter based on percentage increase
-  filter((nr_union - pmax(total_n_1, total_n_2))/total_cell_line > 0.075) %>% # 1000 circ
+  filter((nr_union - pmax(total_n_1, total_n_2))/total_cell_line > 0.07) %>% # 1000 circ
   #filter(nr_union - pmax(total_n_1, total_n_2) > 999) %>%
   filter(perc_compound_val_1 >= 0.9,
          perc_compound_val_2 >= 0.9)
@@ -124,7 +124,7 @@ union_sub %>%
               filter(count_group == "count ≥ 5") %>%
               unique() %>% count(cell_line) %>% rename(total_n = n)) %>%
   mutate(perc_union = nr_union/total_n) %>%
-  #filter(cell_line == "HLF") %>%
+  filter(cell_line == "HLF") %>%
   ggplot(aes(w_val_rate, perc_union)) +
   geom_point(aes(color = (tool_1 == tool_2))) +
   geom_text_repel(aes(label=str_remove(tool_combo, '-'), color = (tool_1 == tool_2)), max.overlaps = 20, size = 3) +

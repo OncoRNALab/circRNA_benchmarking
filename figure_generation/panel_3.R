@@ -118,7 +118,7 @@ upset['amp_seq_not_included'] = cq %>% filter(is.na(amp_seq_val)) %>% mutate(id_
 
 # get number y-axis to add to plot
 cq %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% select(id_cl, qPCR_val) %>% unique() %>% count(qPCR_val)
-cq %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% select(id_cl, RR_val_) %>% unique() %>% count(RR_val)
+cq %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% select(id_cl, RR_val) %>% unique() %>% count(RR_val)
 cq %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% select(id_cl, amp_seq_val) %>% unique() %>% count(amp_seq_val)
 
 
