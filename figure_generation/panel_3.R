@@ -101,8 +101,8 @@ val_longer %>%
   xlab('') +
   ylab('')
 
-#ggsave('separate_figures/figure_3A.pdf',  width = 21, height = 13, units = "cm")
-# val_longer %>% write_tsv('source_data_fig_3A.txt')
+#ggsave('../tmp_figures//figure_3A.pdf',  width = 21, height = 13, units = "cm")
+#val_longer %>% write_tsv('../tmp_figures/source_data_fig_3A.txt')
 
 #' # Figure 3B
 #' upset
@@ -122,8 +122,8 @@ cq %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% select(id_cl, RR
 cq %>% mutate(id_cl = paste(circ_id, cell_line, sep = "_")) %>% select(id_cl, amp_seq_val) %>% unique() %>% count(amp_seq_val)
 
 
-# pdf(file="separate_figures/figure_3B_upset_small.pdf", onefile=FALSE,
-#     width = 8, height = 2.5) 
+# pdf(file="../tmp_figures/figure_3B_upset_small.pdf", onefile=FALSE,
+#     width = 8, height = 2.5)
 upset(fromList(upset), 
       order.by = "freq",
       sets = c('qPCR_val', 'RR_val', 'amp_seq_val', 'qPCR_fail', 'RR_fail', 'amp_seq_fail', 'RR_out_of_range', 'amp_seq_not_included'),
@@ -133,7 +133,7 @@ upset(fromList(upset),
       point.size = 2.5, line.size = 1)
 
 # cq %>% select(qPCR_val, RR_val, amp_seq_val) %>% 
-#   write_tsv('source_data_fig_3B.txt')
+#    write_tsv('../tmp_figures/source_data_fig_3B.txt')
 
 # dev.off()
 
@@ -154,12 +154,12 @@ val_cl
 val_cl$tool = factor(val_cl$tool, levels = c("circseq_cup", "CIRI2", "CIRIquant", "CircSplice", "find_circ", "CirComPara2",  "CIRCexplorer3", "circtools", "Sailfish-cir", "NCLscan", "NCLcomparator", "PFv2", "ecircscreen", "KNIFE",  "circRNA_finder", "segemehl")) 
 
 val_cl %>%
-  #filter(cell_line == 'HLF') %>%
+  filter(cell_line == 'HLF') %>%
   ggplot() +
   geom_bar(aes(tool, total_n_ut), stat = "identity", fill = 'grey') +
   geom_bar(aes(tool, theo_TP_all, fill = count_group), stat = "identity") +
-  facet_wrap(~cell_line+count_group, scales = 'free') +
-  #facet_wrap(~count_group, scales = 'free') +
+  #facet_wrap(~cell_line+count_group, scales = 'free') +
+  facet_wrap(~count_group, scales = 'free') +
   #facet_grid(rows = vars(cell_line), cols = vars(count_group), scales = 'free', space = 'free') +
   mytheme_discrete_x +
   scale_fill_manual(values = c('#00B9F2', '#E69F00' , '#999999')) +
@@ -172,5 +172,5 @@ val_cl %>%
 #ggsave('separate_figures/sup_figure_25.pdf',  width = 21, height = 24.5, units = "cm")
 #ggsave('separate_figures/figure_3C_alt2.pdf',  width = 21, height = 8, units = "cm")
 
-# val_cl %>% write_tsv('source_data_fig_3C.txt')
+#val_cl %>% write_tsv('../tmp_figures/source_data_fig_3C.txt')
 
