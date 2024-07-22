@@ -138,7 +138,7 @@ union_sub %>%
   ylab('% of all predicted circRNAs')
 
 #ggsave('../tmp_figures/figure_4B.pdf',  width = 12, height = 10, units = "cm")
-#ggsave('../tmp_figures/sup_figure_33.pdf',  width = 20, height = 20, units = "cm")
+#ggsave('../tmp_figures/sup_figure_37.pdf',  width = 20, height = 20, units = "cm")
 
 # union_sub %>%
 #   left_join(all_circ %>% select(circ_id, cell_line, count_group) %>%

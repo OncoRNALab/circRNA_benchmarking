@@ -433,7 +433,7 @@ hm %>%
 
 hm %>% count(tool)
 
-#ggsave('sup_figures/sup_figure_21.pdf',  width = 23, height = 13, units = "cm")
+#ggsave('../tmp_figures/sup_figure_21.pdf',  width = 23, height = 13, units = "cm")
 
 
 #' get number for figure 21
@@ -471,7 +471,7 @@ cq %>%
   mytheme_discrete_x +
   theme(legend.position = "right")
 
-#ggsave('separate_figures/Supplementary_Figure_22.pdf', width = 21, height = 10, units = "cm")
+#ggsave('../tmp_figures/Supplementary_Figure_22.pdf', width = 21, height = 10, units = "cm")
 
 
 #' # Sup Figure 23: compound precision values per tool
@@ -493,12 +493,12 @@ val %>%
   ylab('compound precision metric (+/- 95% CI)') +
   theme(legend.position = "")
 
-#ggsave('separate_figures/sup_figure_23.pdf', width = 21, height = 10, units = "cm")
+#ggsave('../tmp_figures/sup_figure_23.pdf', width = 21, height = 10, units = "cm")
 
 #' # Sup Figure 24: sensitivity per tool
 
 sens %>%
-  mutate(margin = qnorm(0.975)*sqrt(sensitivity*(1-sensitivity)/957), #957 is total nr of val circ
+  mutate(margin = qnorm(0.975)*sqrt(sensitivity*(1-sensitivity)/949), #949 is total nr of val circ
          CI_low = sensitivity - margin,
          CI_up = sensitivity + margin) %>%
   ggplot(aes(tool, sensitivity, fill = count_group_median)) +
@@ -512,13 +512,13 @@ sens %>%
   xlab('') +
   theme(legend.position = '')
 
-#ggsave('separate_figures/sup_figure_24.pdf', width =20, height = 10, units = "cm")
+#ggsave('../tmp_figures/sup_figure_24.pdf', width =20, height = 10, units = "cm")
 
 #' # Sup Figure 25: cumulative sensitivity plot
 
 #' ## Calculate cumulative sensitivity
-#' get the set of validated circRNAs => 957
-sens_set = cq %>% 
+#' get the set of validated circRNAs => 949
+sens_set = cq %>%
   # get set of uniquely validated circRNAs
   filter(compound_val == 'pass') %>%
   select(circ_id, cell_line, BSJ_count_median) %>% unique()
@@ -567,7 +567,7 @@ sens_cum %>%
   xlab('(median) BSJ count') +
   ylab('cumulative sensitivity')
 
-#ggsave('Supplementary_Figure_25.pdf', width = 20, height = 15, units = "cm")
+#ggsave('../tmp_figures/Supplementary_Figure_25.pdf', width = 20, height = 15, units = "cm")
 
 #' # Sup Figure 26: theoratical nr of TP circRNAs
 #' see script panel 3
@@ -590,12 +590,12 @@ prec_recall %>%
   scale_x_continuous(labels = scales::percent_format(), limits = c(0,1)) +
   scale_y_continuous(labels = scales::percent_format(), limits = c(0,1)) +
   coord_fixed() +
-  geom_text_repel(max.overlaps = 10) +
+  geom_text_repel(max.overlaps = 20) +
   mytheme +
   theme(legend.position = '') +
   geom_abline(intercept = 0, slope = 1, color = '#999999', linetype = "dashed")
 
-#ggsave('Supplementary_Figure_27.pdf', width = 15, height = 15, units = "cm")
+#ggsave('../tmp_figures/Supplementary_Figure_27.pdf', width = 15, height = 15, units = "cm")
 
 
 #' # Sup Figure 28: precision per cell line
@@ -682,7 +682,7 @@ sens_cl %>%
   scale_y_continuous(labels = scales::percent_format(), limits = c(0,1)) +
   xlab('cell line')
 
-#ggsave('Supplementary_Figure_29.pdf', width = 15, height = 15, units = "cm")
+#ggsave('../tmp_figures/Supplementary_Figure_29.pdf', width = 15, height = 15, units = "cm")
 
 
 
@@ -703,9 +703,22 @@ circ_cl = cq %>% inner_join(cq %>%
 
 circ_cl
 
-# 58
-round(54/58, 3)
-round(4/58, 3)
+
+fail_circ = cq %>% select(circ_id, qPCR_val, RR_val, amp_seq_val, cell_line) %>% unique() %>% 
+  inner_join(circ_cl) %>%
+  select(-cell_line) %>% unique() %>% group_by(circ_id) %>% filter(n() > 1)
+
+fail_circ = fail_circ %>%
+  filter(!amp_seq_val == 'fail',
+         !is.na(RR_val),
+         !is.na(amp_seq_val),
+         RR_val == 'fail') %>%
+  select(circ_id) %>% unique()
+fail_circ
+
+# 74
+round(68/74, 3)
+round(6/74, 3)
 
 # plot all Cq values
 circ_cl = cq %>% inner_join(circ_cl) %>%
@@ -757,14 +770,12 @@ circ_cl %>%
 all_circ %>% select(circ_id) %>% unique()
 
 
-#ggsave('sup_figure_30.pdf', width = 19, height = 9, units = "cm")
+#ggsave('../tmp_figures/sup_figure_30.pdf', width = 19, height = 9, units = "cm")
 
-#' plot those 4 circ => sup figure 17
-cq_4 = cq %>% filter(circ_id %in% c('chr10:96155325-96160402',
-                                    'chr5:177209635-177212195',
-                                    'chr5:36982164-36986301',
-                                    'chr5:618989-655584')) %>%
+#' plot those 12 circ => sup figure 31
+cq_4 = cq %>%
   select(circ_id, cell_line, Cq_max_untreated, Cq_min_treated) %>%
+  inner_join(fail_circ) %>%
   pivot_longer(cols = c(Cq_max_untreated, Cq_min_treated), values_to = 'Cq', names_to = 'sample') %>%
   mutate(Cq = as.numeric(Cq)) 
 
@@ -840,7 +851,7 @@ val_db %>%
   ylab('number of circRNAs') +
   xlab('number of databases in which the circRNAs is reported')
 
-#ggsave('sup_figure_33.pdf', width = 21, height = 8.5, units = "cm")
+#ggsave('../tmp_figures/sup_figure_33.pdf', width = 21, height = 8.5, units = "cm")
 
 
 
@@ -959,7 +970,7 @@ cq %>%
   mytheme_discrete_x +
   theme(legend.position = "right")
 
-#ggsave('separate_figures/Supplementary_Figure_36.pdf', width = 21, height = 10, units = "cm")
+#ggsave('../tmp_figures/Supplementary_Figure_36.pdf', width = 21, height = 10, units = "cm")
 
 #' # Sup Figure 37: combo of two tools
 #' see panel 4 script
@@ -978,7 +989,7 @@ simple_union_3 = read_tsv('../data/Supplementary_Table_8_combo_3tools.txt')
 #' make subset
 union_sub_3 = simple_union_3 %>%
   #filter(nr_union > 4000) %>%
-  filter(nr_union > 9000) %>% # is 70% of HLF : 0.7*13,087
+  filter(nr_union > 8000) %>% # is 70% of HLF : 0.7*13,087
   group_by(cell_line) %>%
   #filter(nr_union - pmax(total_n_1, total_n_2, total_n_3) > 2499) %>%
   ungroup() %>%
@@ -1006,7 +1017,7 @@ union_sub_3
 #' give combo nr and add info
 
 union_sub_3 = union_sub_3 %>%
-  mutate(combo = paste("combo", 1:12, sep = "_"))
+  mutate(combo = paste("combo", 1:16, sep = "_"))
 
 union_sub_3 = union_sub_3 %>%
   bind_rows(simple_union_3 %>%
@@ -1076,7 +1087,7 @@ union_sub_3 %>%
   xlab('(weighted) compound precision value') +
   ylab('percentage of all predicted circRNAs')
 
-#ggsave('separate_figures/sup_figure_38.pdf', width = 21, height = 18, units = "cm")
+#ggsave('../tmp_figures/sup_figure_38.pdf', width = 21, height = 18, units = "cm")
 
 
 #' check mean increase in perc
@@ -1149,4 +1160,4 @@ sim_data_sens %>%
   xlab('sensitivity based on simulated data (PMID 28594838 and 34645386)') +
   ylab('sensitivity based on orthogonal validation (from this manuscript)')
 
-#ggsave('Supplementary_Figure_40.pdf', width = 22, height = 15, units = "cm")
+#ggsave('../tmp_figures/Supplementary_Figure_40.pdf', width = 22, height = 15, units = "cm")
