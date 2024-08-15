@@ -9,9 +9,9 @@ CIRI2	segmented read-based	G	entire genome	based on GT-AG splice sites	canonical
 CIRIquant	segmented read-based	H	entire genome	based on GT-AG splice sites	canonical	no
 ecircscreen	integrative	I	entire genome	based on consensus from tools	canonical	no
 find_circ	segmented read-based	J	entire genome	based on mapping to genome	canonical	no
-KNIFE	candidate-based	K	entire genome	based on linear annotation	non-canonical	yes
-NCLcomparator	candidate-based	L	known splice sites	based on linear annotation	non-canonical	no
-NCLscan	candidate-based	N	known splice sites	based on linear annotation	non-canonical	no
+KNIFE	candidate-based	K	entire genome	based on linear annotation	canonical	yes
+NCLcomparator	candidate-based	L	known splice sites	based on linear annotation	canonical	no
+NCLscan	candidate-based	N	known splice sites	based on linear annotation	canonical	no
 PFv2	segmented read-based	M	entire genome	based on mapping to genome	canonical	no
 Sailfish-cir	segmented read-based	N	entire genome	no strand reported	canonical	no
 segemehl	segmented read-based	O	entire genome	no strand reported	non-canonical	yes

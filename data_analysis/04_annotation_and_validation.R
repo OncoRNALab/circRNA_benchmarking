@@ -116,6 +116,20 @@ OR = (cont_table[2,2]/cont_table[2,1])/(cont_table[1,2]/cont_table[1,1])
 OR
 
 
+#' numbers for paper
+
+cq %>% 
+  filter(tools > 1) %>%
+  select(circ_id) %>%
+  unique()
+
+
+cq %>% 
+  filter(tools > 1) %>%
+  filter(qPCR_val == "fail" |
+         RR_val == 'fail' |
+         amp_seq_val == 'fail') %>%
+  select(circ_id) %>% unique()
 
 #' ## Link with nr of exons
 #' ### Single exon vs multi-exon
@@ -564,16 +578,16 @@ summary(res.aov)
 res.aov = aov(perc_amp_val ~ cell_line+tool, data = val_cl_anova)
 summary(res.aov)
 
-0.00912/(0.00912+0.09004+0.00279)
-0.09004/(0.00912+0.09004+0.00279)
+0.00935/(0.00935+0.09020+0.00279)
+0.09020/(0.00935+0.09020+0.00279)
 
 
 #' ### compound precision
 res.aov = aov(perc_compound_val ~ cell_line+tool, data = val_cl_anova)
 summary(res.aov)
 
-0.06205/(0.06205+0.09406+0.00359)
-0.09406/(0.06205+0.09406+0.00359)
+0.06252/(0.06252+0.09443+0.00353)
+0.09443/(0.06252+0.09443+0.00353)
 
 
 #' # Combination of tools

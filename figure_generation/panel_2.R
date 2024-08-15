@@ -1,6 +1,6 @@
 
 #' ---
-#' title: "Generation of figures pannel 2"
+#' title: "Generation of figures panel 2"
 #' author: "Marieke Vromman"
 #' output: 
 #'    html_document:
@@ -35,11 +35,11 @@ library(ggseqlogo)
 mytheme = theme_bw(base_size = 10) + 
   theme(text = element_text(size=10, colour='black'),
         title = element_text(size=10, colour='black'),
-        line = element_line(size=0.5),
+        line = element_line(linewidth=0.5),
         axis.title = element_text(size=10, colour='black'),
         axis.text = element_text(size=10, colour='black'),
         axis.line = element_line(colour = "black"),
-        axis.ticks = element_line(size=0.5),
+        axis.ticks = element_line(linewidth =0.5),
         strip.background = element_blank(),
         strip.text.y = element_blank(),
         panel.grid = element_blank(),
@@ -88,15 +88,8 @@ all_circ %>%
 
 
 #' # Figure 2C & Sup Figure 4
-nr_detected = all_circ %>% 
-  group_by(chr, start, end, circ_id, cell_line) %>%
-  summarise(n_detected = n()) %>%
-  ungroup()
-
-nr_detected
 
 n_detected_per_tool = all_circ %>% 
-  left_join(nr_detected) %>%
   mutate(n_detected_group = NA,
          n_detected_group = ifelse(n_detected == 1, 'unique', n_detected_group),
          n_detected_group = ifelse(n_detected > 1, '2 tools', n_detected_group),
@@ -112,7 +105,7 @@ n_detected_per_tool$tool = factor(n_detected_per_tool$tool, levels = c("circseq_
 
 
 n_detected_per_tool %>%
-  #filter(cell_line == "HLF") %>%
+  filter(cell_line == "HLF") %>%
   ggplot(aes(tool, fill = n_detected_group)) +
   geom_bar() +
   mytheme_discrete_x +
@@ -123,13 +116,13 @@ n_detected_per_tool %>%
   #facet_wrap(~cell_line) +
   scale_y_continuous(labels = scales::comma_format())
 
-#ggsave('separate_figures/figure_2C.pdf',  width = 10, height = 9, units = "cm")
-#ggsave('../supplemental/sup_figures/sup_figure_4.pdf',  width = 21, height = 12, units = "cm")
+#ggsave('../tmp_figures/figure_2C.pdf',  width = 10, height = 9, units = "cm")
+#ggsave('../tmp_figures/sup_figure_4.pdf',  width = 21, height = 12, units = "cm")
 
-# n_detected_per_tool %>% 
+# n_detected_per_tool %>%
 #   group_by(tool, cell_line, n_detected_group) %>%
 #   tally() %>% ungroup() %>%
-#   write_tsv('source_data_fig_2C.txt')
+#   write_tsv('../tmp_figures/source_data_fig_2C.txt')
 
 #' # Figure 2D
 
@@ -157,8 +150,8 @@ ggplot() +
         text = element_text(size=10, colour='gray30'),
         title = element_text(size=10, colour='gray30'))
 
-#ggsave('separate_figures/figure_2D.pdf',  width = 20, height = 4.5, units = "cm")
+#ggsave('../tmp_figures/figure_2D.pdf',  width = 20, height = 4.5, units = "cm")
 
-# circ_ss_list %>% write_tsv('source_data_fig_2D.txt')
+#all_circ %>% select(circ_id, tool, ss_motif) %>% write_tsv('../tmp_figures/source_data_fig_2D.txt')
 
 

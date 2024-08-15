@@ -156,7 +156,7 @@ perc_val %>% write_tsv('../data/Supplementary_Table_6A_precision_values.txt')
 
 
 #' # Calculate sensitivity
-#' ## Based on validated set (n = 657)
+#' ## Based on validated set (n = 949)
 
 #' first calculate the total nr of validated circ per count group
 
@@ -352,15 +352,15 @@ cq %>%
   select(circ_id, cell_line, qPCR_val) %>% unique() %>%
   count(qPCR_val)
 
-round(1479/(1479+37), digits = 3)
+round(1468/(1468+37), digits = 3)
 
 #' ### RNase R
 cq %>%
   select(circ_id, cell_line, RR_val) %>% unique() %>%
   count(RR_val)
 
-round(1319/(1319+85), digits = 3)
-round(112/(1319+85+112), digits = 3)
+round(1308/(1308+85), digits = 3)
+round(112/(1308+85+112), digits = 3)
 
 #' ### amplicon sequencing
 cq %>%
@@ -371,8 +371,8 @@ cq %>%
   select(circ_id, cell_line, amp_seq_val_detail) %>% unique() %>%
   count(amp_seq_val_detail)
 
-round(1014/(1014+165), digits = 3)
-round(337/(1014+165+337), digits = 3)
+round(1006/(1006+141), digits = 3)
+round(335/(1006+141+335), digits = 3)
 
 #' ## Overall validation rates (ignoring tools) - low-abundant circ
 #' ### RT-qPCR
@@ -410,7 +410,7 @@ cq %>%
   unique() %>%
   filter(qPCR_val == 'pass', RR_val == 'pass', amp_seq_val == 'pass')
 
-round(957/1516, digits = 3)
+round(949/1505, digits = 3)
 
 #' nr of unique circ that fail all val methods
 cq %>%
@@ -418,7 +418,7 @@ cq %>%
   unique() %>%
   filter(qPCR_val == 'fail', RR_val == 'fail', amp_seq_val == 'fail')
 
-round(18/1516, digits = 3)
+round(18/1505, digits = 3)
 
 
 #' nr of unique circ that fail 1 or 2 val methods
@@ -433,7 +433,7 @@ cq %>%
   #filter(val_nr == 3)
   filter(val_nr < 3, val_nr > 0)
 
-round(128/1516, digits = 3)
+round(127/1505, digits = 3)
 
 
 #' nr of cicrc that have at least one NA
@@ -446,7 +446,7 @@ cq %>%
   #filter(NA_nr == 3)
   filter(NA_nr > 0)
 
-round(413/1516, digits = 3)
+round(411/1505, digits = 3)
 
 
 #' nr of unique circ that have no NAs
@@ -457,10 +457,27 @@ cq %>%
 
 #' => recalculate previous numbers based on no NAs
 #' all pass
-round(957/1103, digits = 3)
+round(949/1094, digits = 3)
 #' all fail
-round(18/1103, digits = 3)
+round(18/1094, digits = 3)
 #' one or two fail
-round(128/1103, digits = 3)
+round(127/1094, digits = 3)
 
+# calc for upset plot
+cq = read_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
+cq
 
+cq %>%
+  select(circ_id, amp_seq_val_detail, RR_val_detail, qPCR_val_detail, cell_line) %>%
+  unique() %>%
+  count(qPCR_val_detail)
+  
+cq %>%
+  select(circ_id, amp_seq_val_detail, RR_val_detail, qPCR_val_detail, cell_line) %>%
+  unique() %>%
+  count(RR_val_detail)
+
+cq %>%
+  select(circ_id, amp_seq_val_detail, RR_val_detail, qPCR_val_detail, cell_line) %>%
+  unique() %>%
+  count(amp_seq_val_detail)

@@ -192,7 +192,7 @@ count_conc_lm %>% mutate(delta_slope = abs(1-slope)) %>%
 #' calculate Jaccard index 
 
 jac = read_tsv("../data/Supplementary_Table_7_combo_2tools.txt") %>%
-  filter(cell_line == 'SW480') %>%
+  filter(cell_line == 'NCI-H23') %>%
   mutate(jac_index = nr_intersection/nr_union,
          jac_dist = 1 - jac_index) # calculate jac index and distance
 
@@ -210,9 +210,9 @@ count_matrix = as.matrix(count_table)
 rownames(count_matrix) = rn
  
 
-#pdf("separate_figures/sup_figure_5_SW480.pdf", height=8, width=12)
+#pdf("../tmp_figures/sup_figure_5_NCI-H23.pdf", height=8, width=12)
 heatmap.2(count_matrix,
-          main = "SW480 - bin - Jaccard",
+          main = "NCI-H23 - bin - Jaccard",
           trace = "none", density.info = "none")
 #dev.off()
 
@@ -240,7 +240,7 @@ all_circ_db %>%
                     values = c("#0072B2", '#00B9F2', '#00A875', "#E69F00", "#CC79A7")) +
   mytheme_discrete_x
 
-#ggsave('sup_figures/sup_figure_6.pdf',  width = 20, height = 9, units = "cm")
+#ggsave('../tmp_figures/sup_figure_6.pdf',  width = 20, height = 9, units = "cm")
 
 
 #' numbers for paper
@@ -248,7 +248,7 @@ all_circ_db %>%
   select(circ_id, n_db) %>% unique() %>%
   filter(is.na(n_db))
 
-round(215885/315312, digits = 3)
+round(198035/297717, digits = 3)
 
 all_circ_db %>%
   group_by(tool) %>%
@@ -284,9 +284,9 @@ all_circ_enst %>%
   select(chr, start, end, strand, ENST_group) %>% unique() %>%
   count(ENST_group)
 
-round(100 * 216483 / (216483 + 41683 + 144782), 1)
-round(100 * 41683 / (216483 + 41683 + 144782), 1)
-round(100 * 144782 / (216483 + 41683 + 144782), 1)
+round(100 * 201635 / (201635 + 39326 + 144417), 1)
+round(100 * 39326 / (201635 + 39326 + 144417), 1)
+round(100 * 144417 / (201635 + 39326 + 144417), 1)
 
 #' # Sup Figure 8: distribution of estimated circRNA length
 all_circ %>% 
@@ -364,7 +364,7 @@ all_circ_exons %>%
 
 #' # Sup Figure 10: nr of circRNAs on both strands per tool
 #' first calculate strand distribution linear genes
-ens = read_tsv('~/Documents/PhD/indexes/Homo_sapiens.GRCh38.103.genes.gtf') %>%
+ens = read_tsv('../../../references/Homo_sapiens.GRCh38.103.genes.gtf') %>%
   select(gene_id, strand) %>%
   rename(circ_id = gene_id) %>%
   mutate(tool = 'lineair genes',
