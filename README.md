@@ -24,7 +24,7 @@ The `data_analysis` folder contains
 
 The `figure_generating` folder contains the R scripts and R markdowns to generate all Figures and Supplementary Figures in the manuscript.
 
-## correction
+## correction of coordinates bug
 One of the collaborators noticed a mistake in the published data and figures. This mistake has now been rectifed in the GitHub repo. The correction have been submitted to Nature Methods and we are currently waiting for the online publication to be updated. In summary, an accidental basepair shift changed the BSJ position of 5% of the circRNAs. All the main conclusions and the majority of the figures stay the same.
 
 In detail: 55,238 out of 1,137,055 (~ 5%) circRNAs described in the paper were accidentally shifted one nucleotide in both the start (-1) and end position (+1), and therefore wrongly annotated. For example: circRNAs chr18:8718424-8720495 in the original data became chr18:8718423-8720496. This set of circRNAs comes from 3 tools: KNIFE/NCLscan/NCLcomparator. This happened during a wrongly performed ‘correction’ of 1-based to 0-based annotation. This change has now been fixed.  
