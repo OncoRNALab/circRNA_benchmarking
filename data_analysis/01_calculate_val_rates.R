@@ -463,4 +463,21 @@ round(18/1094, digits = 3)
 #' one or two fail
 round(127/1094, digits = 3)
 
+# calc for upset plot
+cq = read_tsv('../data/Supplementary_Table_3_selected_circRNAs.txt')
+cq
 
+cq %>%
+  select(circ_id, amp_seq_val_detail, RR_val_detail, qPCR_val_detail, cell_line) %>%
+  unique() %>%
+  count(qPCR_val_detail)
+  
+cq %>%
+  select(circ_id, amp_seq_val_detail, RR_val_detail, qPCR_val_detail, cell_line) %>%
+  unique() %>%
+  count(RR_val_detail)
+
+cq %>%
+  select(circ_id, amp_seq_val_detail, RR_val_detail, qPCR_val_detail, cell_line) %>%
+  unique() %>%
+  count(amp_seq_val_detail)
