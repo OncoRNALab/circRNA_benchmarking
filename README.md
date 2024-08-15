@@ -25,7 +25,7 @@ The `data_analysis` folder contains
 The `figure_generating` folder contains the R scripts and R markdowns to generate all Figures and Supplementary Figures in the manuscript.
 
 ## correction of coordinates bug
-One of the collaborators noticed a mistake in the published data and figures. This mistake has now been rectifed in the GitHub repo. The correction have been submitted to Nature Methods and we are currently waiting for the online publication to be updated. In summary, an accidental basepair shift changed the BSJ position of 5% of the circRNAs. All the main conclusions and the majority of the figures stay the same.
+One of the collaborators noticed a mistake in the published data and figures. This mistake has now been rectified in the GitHub repo. The correction have been submitted to Nature Methods and we are currently waiting for the online publication to be updated. In summary, an accidental basepair shift changed the BSJ position of 5% of the circRNAs. All the main conclusions and the majority of the figures stay the same.
 
 In detail: 55,238 out of 1,137,055 (~ 5%) circRNAs described in the paper were accidentally shifted one nucleotide in both the start (-1) and end position (+1), and therefore wrongly annotated. For example: circRNAs chr18:8718424-8720495 in the original data became chr18:8718423-8720496. This set of circRNAs comes from 3 tools: KNIFE/NCLscan/NCLcomparator. This happened during a wrongly performed ‘correction’ of 1-based to 0-based annotation. This change has now been fixed.  
 
@@ -34,6 +34,7 @@ This influences:
 - the overlap between tools
 - the amplicon sequencing precision (subgroup BSJ count ≥ 5) is sligthly higher for KNIFE and NCLcomparator. Therefore, also their compound precision is slightly higher.
 - the sensitivty has changed as there is more overlap between the tools than initially measured. The set of TP circRNAs is thus 949 unique circRNAs (instead of 957) (Sup Table 6B). This also slightly changes the tool ranking (Sup Table 6).
+- all tables and sup tables
 - the following figures (most of them are only small changes):
   - main panels: 2C, 2D, 3A, 3B, 4A, 5B
   - sup figures: 4, 5, 6, 14, 21, 22, 23, 24, 25, 27, 29, 30, 33, 36, 37, 38, 40
